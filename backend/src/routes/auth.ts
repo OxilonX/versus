@@ -3,9 +3,7 @@ import type { ExpressContext } from "better-auth/express";
 import type { Request, Response } from "express";
 
 export function createAuthRouter() {
-  const router = auth.router;
-
-  return router;
+  return auth.api;
 }
 
 export async function getSession(req: Request, res: Response) {
