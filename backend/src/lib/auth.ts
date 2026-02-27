@@ -4,13 +4,22 @@ import { prisma } from "./prisma.js";
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
-  basePath: "/auth",
+  basePath: "/api/auth",
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
+  },
+
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      accessType: "offline",
+      prompt: "select_account consent",
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7,
@@ -20,7 +29,7 @@ export const auth = betterAuth({
       maxAge: 5 * 60,
     },
   },
-  trustedOrigins: ["http://localhost:3000"],
+  trustedOrigins: ["http://localhost:3000", "http://localhost:4000"],
   secret: process.env.BETTER_AUTH_SECRET,
 });
 

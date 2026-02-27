@@ -16,7 +16,7 @@ app.use(
 );
 
 console.log("Setting up auth handler...");
-app.all("/auth/*", toNodeHandler(auth));
+app.all("/api/auth/*", toNodeHandler(auth));
 
 app.use(express.json());
 
@@ -28,5 +28,5 @@ app.get("/health", (_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📚 API available at http://localhost:${PORT}/auth`);
+  console.log(`📚 Auth API available at http://localhost:${PORT}/auth`);
 });
