@@ -28,7 +28,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <main className="bg-background">{children}</main>
+          <main className="bg-background container mx-auto max-w-275 px-4">
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>

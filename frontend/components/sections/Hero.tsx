@@ -18,7 +18,7 @@ import { Star } from "lucide-react";
 const Hero = () => {
   const { header, paragraph, url } = heroInfo;
   return (
-    <section id="hero-section" className="container mx-auto max-w-275 px-4">
+    <section id="hero-section" className="">
       <div className=" pt-8  flex justify-between  items-center">
         <div className="flex flex-col gap-10">
           <div className="flex flex-col gap-4">
@@ -60,7 +60,7 @@ const Hero = () => {
                 <p className="text-base font-bold">
                   4.5
                   <span className="text-sm text-muted-foreground font-normal">
-                    (review rating)
+                    {" (review rating)"}
                   </span>
                 </p>
               </div>
@@ -94,7 +94,7 @@ const Hero = () => {
             width={1100}
             height={1100}
             priority
-            className="justify-self-end self-start dark:brightness-90"
+            className="justify-self-end self-start dark:brightness-90 drop-shadow-muted drop-shadow-2xl"
           />
         </div>
       </div>
