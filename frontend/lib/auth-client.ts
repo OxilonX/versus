@@ -9,6 +9,9 @@ export const { useSession, signOut, signUp } = authClient;
 export async function signIn() {
   await authClient.signIn.social({
     provider: "google",
-    callbackURL: "/",
+    callbackURL:
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "http://localhost:3000",
   });
 }
