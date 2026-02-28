@@ -18,14 +18,15 @@ const Navbar = () => {
   const { data: session, isPending } = useSession();
   const router = useRouter();
   return (
-    <header className="container mx-auto px-8 pl-4 py-3  flex justify-between items-center">
+    <header className="sticky top-0 container  max-w-275 px-4  mx-auto pl-1 py-3  flex justify-between items-center">
       <Image
+        onClick={() => router.push("/")}
         src="/icons/versus_logo_final_small_2.svg"
         alt="Versus Logo"
         width={90}
         height={90}
         priority
-        className="h-auto mt-0.5  dark:invert-100"
+        className="h-auto mt-0.5  dark:invert-100 cursor-pointer"
       />
 
       <nav className="flex items-center gap-8">

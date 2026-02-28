@@ -16,10 +16,12 @@ export const characs = [
   },
 ];
 export const heroInfo = {
-  header: "Fact Versus Opinion",
-  paragraph: `Settle the internet's oldest debates with a single tap. Cast your vote,
-              track realtime rankings, and see if your favorites can reign supreme.`,
-  url: "/images/argument_hd.png",
+  header: "Facts Versus Popular Belief",
+  paragraph: `Settle the internet's oldest debates with a single tap.
+Cast your vote to turn subjective arguments into data.
+Track realtime rankings as the global community decides.
+See if your favorite takes can finally reign supreme.`,
+  url: "/images/argument_office.png",
 };
 export const avatars = [
   {
@@ -51,5 +53,19 @@ export const avatars = [
     url: "/images/avatar-5.jpeg",
     fallback: "PL",
     alt: "User Profile 5",
+  },
+];
+export const techSpecs = [
+  {
+    id: 1,
+    label: "Interaction Latency",
+    value: "12ms",
+    description: "Optimized edge-runtime for instant vote processing.",
+  },
+  {
+    id: 2,
+    label: "Scalable Backbone",
+    value: "Infinite",
+    description: "Stateless architecture designed to scale on demand.",
   },
 ];
