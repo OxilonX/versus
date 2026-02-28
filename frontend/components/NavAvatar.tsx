@@ -9,12 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { signOut } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 export default function NavAvatar() {
   const router = useRouter();
-
+  const session = useSession();
   const handleSignOut = async () => {
     await signOut();
     router.refresh();
@@ -24,7 +24,14 @@ export default function NavAvatar() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="rounded-full">
           <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" alt="shadcn" />
+            <AvatarImage
+              src={
+                session.data?.user
+                  ? session.data?.user?.image
+                  : "https://github.com/shadcn.png"
+              }
+              alt="shadcn"
+            />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
         </Button>

@@ -2,11 +2,12 @@
 
 import { useSession, signIn } from "@/lib/auth-client";
 import Image from "next/image";
-import NavAvatar from "./NavAvatar";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
+//local comps imports
+import NavAvatar from "./NavAvatar";
+import { ThemeToggle } from "./ThemeToggle";
 const navElements = [
   { id: 1, content: "home", href: "/" },
   { id: 2, content: "arena", href: "/arena" },
@@ -17,14 +18,14 @@ const Navbar = () => {
   const { data: session, isPending } = useSession();
   const router = useRouter();
   return (
-    <header className="container mx-auto px-8 py-6 flex justify-between items-center">
+    <header className="container mx-auto px-8 py-3 bg-card  flex justify-between items-center">
       <Image
         src="/versus_logo_final_small_2.svg"
         alt="Versus Logo"
         width={90}
         height={90}
         priority
-        className="h-auto mt-0.5"
+        className="h-auto mt-0.5 dark:invert-100"
       />
 
       <nav className="flex items-center gap-8">
@@ -51,15 +52,23 @@ const Navbar = () => {
               <Button
                 className=" text-base "
                 onClick={() => {
-                  router.push("/signin");
+                  router.push("/login");
                 }}
                 variant="ghost"
               >
                 Sign In
               </Button>
-              <Button className="bg-primary text-base ">Sign Up</Button>
+              <Button
+                onClick={() => {
+                  router.push("/signup");
+                }}
+                className="bg-primary text-base "
+              >
+                Sign Up
+              </Button>
             </div>
           )}
+          <ThemeToggle />
         </div>
       </nav>
     </header>
