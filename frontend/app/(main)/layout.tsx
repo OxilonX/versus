@@ -15,7 +15,7 @@ export default function RootLayout({
     <div>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <Navbar />
-        <main className="bg-black">{children}</main>
+        <main className="bg-background">{children}</main>
       </ThemeProvider>
     </div>
   );

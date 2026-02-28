@@ -15,18 +15,33 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { signIn, useSession } from "@/lib/auth-client";
+import { GoogleSignIn, signUp, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
-  const session = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (session.data) router.push("/");
+    if (session) router.push("/");
   }, [session, router]);
+
+  const handleSignupSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const name = formData.get("name") as string;
+
+    try {
+      await signUp(email, password, name);
+      router.push("/");
+    } catch (error) {
+      console.error("Signup failed:", error);
+    }
+  };
   return (
-    <Card {...props}>
+    <Card className="bg-card" {...props}>
       <CardHeader>
         <CardTitle>Create an account</CardTitle>
         <CardDescription>
@@ -34,17 +49,18 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form>
+        <form onSubmit={handleSignupSubmit}>
           <FieldGroup>
             <div className="flex items-center justify-between gap-4">
               <Field>
                 <FieldLabel htmlFor="name">Username</FieldLabel>
-                <Input id="name" type="text" placeholder="John Doe" required />
+                <Input id="name" name="name" type="text" placeholder="John Doe" required />
               </Field>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="m@example.com"
                   required
@@ -54,7 +70,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input id="password" type="password" required />
+              <Input id="password" name="password" type="password" required />
               <FieldDescription>
                 Must be at least 8 characters long.
               </FieldDescription>
@@ -63,15 +79,15 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               <FieldLabel htmlFor="confirm-password">
                 Confirm Password
               </FieldLabel>
-              <Input id="confirm-password" type="password" required />
+              <Input id="confirm-password" name="confirmPassword" type="password" required />
               <FieldDescription>Please confirm your password.</FieldDescription>
             </Field>
             <Field>
               <Button type="submit">Create Account</Button>
 
               <Button
-                onClick={() => signIn()}
-                variant="outline"
+                onClick={() => GoogleSignIn()}
+                variant="secondary"
                 type="button"
                 className="w-full"
               >
