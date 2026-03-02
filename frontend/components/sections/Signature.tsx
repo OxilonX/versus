@@ -23,9 +23,15 @@ const Signature = () => {
         </p>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <img src="" alt="signature" />
-        <p className="text-xs text-foreground font-bold">
-          Boulmehad <span className="text-primary">founder</span>
+        <Image
+          src="/icons/signature.png"
+          alt="badge image"
+          width={400}
+          height={400}
+          className=""
+        />
+        <p className="text-[8px] text-center text-foreground font-bold -mt-7">
+          <span className="text-primary ">{"founder "}</span>B. Abderrahmane
         </p>
       </div>
     </div>
