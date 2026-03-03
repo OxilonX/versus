@@ -3,7 +3,8 @@ import { battles } from "@/utils/BattlesVars";
 import Image from "next/image";
 const Battles = () => {
   return (
-    <div className="">
+    <div className="flex flex-col gap-4">
+      <h1 className="text-3xl font-black uppercase ">Top Battles</h1>
       <ul className="relative flex flex-col rounded-xl overflow-hidden shadow-md shadow-accent-foreground dark:shadow-background">
         {battles.map((b) => (
           <li
