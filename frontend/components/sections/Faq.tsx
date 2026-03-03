@@ -8,9 +8,9 @@ import { faqs } from "@/utils/FaqVars";
 const Faq = () => {
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-3xl font-black uppercase ">FAQ</h1>
+      <h1 className="hd-font text-3xl font-black uppercase ">FAQ</h1>
       <ul>
-        <li className="">
+        <li className="overflow-hidden rounded-xl">
           <Accordion
             type="single"
             collapsible

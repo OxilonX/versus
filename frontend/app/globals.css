@@ -58,7 +58,7 @@
   --muted-foreground: oklch(0.454 0.04 294.686);
   --popover: oklch(0.98 0.006 296.219);
   --popover-foreground: oklch(0 0 0);
-  --card: oklch(0.97 0.009 296.161);
+  --card: oklch(94.529% 0.00685 295.082);
   --card-foreground: oklch(0 0 0);
   --border: oklch(0.928 0.006 264.531);
   --input: oklch(0.928 0.006 264.531);
@@ -114,4 +114,7 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+.hd-font{
+  font-family: "Bebas Neue", sans-serif;;
 }

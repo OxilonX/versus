@@ -13,10 +13,10 @@ export default function Home() {
         <Features />
       </section>
       <section className="bg-background py-15">
-        <Signature />
+        <Battles />
       </section>
       <section className="bg-background py-15">
-        <Battles />
+        <Signature />
       </section>
       <section className="bg-background py-15">
         <Faq />

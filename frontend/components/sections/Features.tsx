@@ -8,7 +8,9 @@ import Image from "next/image";
 const Features = () => {
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-3xl font-black uppercase ">System capabilities</h1>
+      <h1 className="hd-font text-3xl font-black uppercase ">
+        System capabilities
+      </h1>
       <div className="grid grid-cols-3 gap-6 h-screen">
         <div className="flex flex-col gap-6">
           {featuresLeft.map((f) => (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession, signIn } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-client";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import Link from "next/link";
@@ -18,7 +18,7 @@ const Navbar = () => {
   const { data: session, isPending } = useSession();
   const router = useRouter();
   return (
-    <header className="sticky   py-3  flex justify-between items-center">
+    <header className="bg-background  container mx-auto max-w-275 px-4 sticky   py-3  flex justify-between items-center">
       <Image
         onClick={() => router.push("/")}
         src="/icons/versus_logo_final_small_2.svg"

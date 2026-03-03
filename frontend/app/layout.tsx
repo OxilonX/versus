@@ -30,9 +30,7 @@ export default function RootLayout({
         className={`${lato.variable} ${bebas.variable} antialiased font-sans`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <main className="bg-background container mx-auto max-w-275 px-4">
-            {children}
-          </main>
+          <main className="">{children}</main>
         </ThemeProvider>
       </body>
     </html>
