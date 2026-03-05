@@ -3,7 +3,7 @@ import {
   createPost,
   getPosts,
   getPostById,
-} from "../controllers/postController.js";
+} from "../controllers/challengesController.js";
 
 const router = Router();
 

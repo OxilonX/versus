@@ -15,8 +15,10 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  sessions Session[]
-  accounts Account[]
+  sessions   Session[]
+  accounts   Account[]
+  items      Item[]
+  challenges Challenge[]
 
   @@map("user")
 }
@@ -81,4 +83,38 @@ model Verification {
   @@unique([identifier, value])
   @@index([identifier])
   @@map("verification")
+}
+
+model Challenge {
+  id        String          @id @default(cuid())
+  title     String
+  userId    String
+  user      User            @relation(fields: [userId], references: [id])
+  items     ChallengeItem[]
+  createdAt DateTime        @default(now())
+
+  @@map("challenge")
+}
+
+model Item {
+  id       String  @id @default(cuid())
+  name     String
+  imageUrl String? @default("image.example.com")
+  isPublic Boolean @default(true)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  challenges ChallengeItem[]
+
+  @@map("item")
+}
+
+model ChallengeItem {
+  challengeId String
+  itemId      String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  item        Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([challengeId, itemId])
 }

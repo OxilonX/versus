@@ -1,7 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 import type { Request, Response } from "express";
 
-export async function createPost(req: Request, res: Response) {
+export const createPost = async (req: Request, res: Response) => {
   try {
     const { title, content, published = false } = req.body;
 
@@ -23,9 +23,9 @@ export async function createPost(req: Request, res: Response) {
     console.error("Error creating post:", error);
     res.status(500).json({ error: "Failed to create post" });
   }
-}
+};
 
-export async function getPosts(req: Request, res: Response) {
+export const getPosts = async (req: Request, res: Response) => {
   try {
     const { published } = req.query;
 
@@ -42,9 +42,9 @@ export async function getPosts(req: Request, res: Response) {
     console.error("Error fetching posts:", error);
     res.status(500).json({ error: "Failed to fetch posts" });
   }
-}
+};
 
-export async function getPostById(req: Request, res: Response) {
+export const getPostById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -62,4 +62,4 @@ export async function getPostById(req: Request, res: Response) {
     console.error("Error fetching post:", error);
     res.status(500).json({ error: "Failed to fetch post" });
   }
-}
+};

@@ -19,7 +19,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-background text-muted-foreground px-4 py-10 border-t border-border mt-15">
+    <footer className="bg-accent-foreground text-background px-4 py-10 border-t border-border border-t-foreground mt-15">
       <div className="max-w-275 mx-auto md:px-8">
         <div className="max-w-lg sm:mx-auto sm:text-center">
           <div className="flex items-center gap-2 justify-center mx-auto ">
@@ -29,9 +29,9 @@ const Footer = () => {
               width={80}
               height={80}
               priority
-              className="h-auto mt-0.5  dark:invert-100 cursor-pointer"
+              className="h-auto mt-0.5 invert-100  dark:invert-0 cursor-pointer"
             />
-            <h1 className="text-[3.4rem] font-black uppercase text-foreground">
+            <h1 className="text-[3.4rem] font-black uppercase text-background">
               versus
             </h1>
           </div>
@@ -44,14 +44,14 @@ const Footer = () => {
 
         <ul className="items-center justify-center mt-8 space-y-5 sm:flex sm:space-x-4 sm:space-y-0">
           {footerNavs.map((item, idx) => (
-            <li key={idx} className="hover:text-foreground transition-colors">
+            <li key={idx} className="hover:text-primary transition-colors">
               <a href={item.href}>{item.name}</a>
             </li>
           ))}
         </ul>
 
         <div className="mt-8 items-center justify-between border-t border-border pt-8 sm:flex">
-          <div className="mt-4 sm:mt-0">
+          <div className="mt-4 sm:mt-0 text-muted">
             &copy; {new Date().getFullYear()} Boulmehad Inc. All rights
             reserved.
           </div>

@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
-import postRouter from "./routes/post.js";
+import postRouter from "./routes/challengesRoute.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
