@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 export default function NavAvatar() {
   const router = useRouter();
@@ -20,11 +19,6 @@ export default function NavAvatar() {
     await signOut();
     router.refresh();
   };
-  useEffect(() => {
-    if (session) {
-      router.push("/");
-    }
-  }, [session, router]);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

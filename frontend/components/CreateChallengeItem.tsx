@@ -6,33 +6,18 @@ import { Plus, Search } from "lucide-react";
 //shadcn imports
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { SearchIcon } from "lucide-react";
 import Image from "next/image";
 //next imports
 
 import Link from "next/link";
-const CreateChallengeItem = ({ itemNumber = "first" }) => {
+const CreateChallengeItem = () => {
   const imagesBrands = [
-    {
-      svg: (
-        <svg
-          style={{ width: 12 }}
-          role="img"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <title>Unsplash</title>
-          <path d="M7.5 6.75V0h9v6.75h-9zm9 3.75H24V24H0V10.5h7.5v6.75h9V10.5z" />
-        </svg>
-      ),
-      name: "unsplash",
-      link: "https://unsplash.com",
-      color: "#000000",
-    },
     {
       svg: (
         <svg
@@ -64,6 +49,22 @@ const CreateChallengeItem = ({ itemNumber = "first" }) => {
       name: "pexels",
       link: "https://pexels.com",
       color: "#05A081",
+    },
+    {
+      svg: (
+        <svg
+          style={{ width: 12 }}
+          role="img"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title>Unsplash</title>
+          <path d="M7.5 6.75V0h9v6.75h-9zm9 3.75H24V24H0V10.5h7.5v6.75h9V10.5z" />
+        </svg>
+      ),
+      name: "unsplash",
+      link: "https://unsplash.com",
+      color: "#000000",
     },
   ];
   const [items, setItems] = useState([
@@ -103,142 +104,164 @@ const CreateChallengeItem = ({ itemNumber = "first" }) => {
       isPublic: true,
     },
   ]);
-  const [fullDate, setFullDate] = useState(new Date().toISOString());
+  const [fullDate, setFullDate] = useState<string>("");
   useEffect(() => {
     const now = new Date().toISOString();
     setFullDate(now);
   }, []);
-  const [tab, setTab] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
     imageUrl: "",
     isPublic: true,
   });
+  const [searchQuerry, setSearchQuerry] = useState("");
   return (
     <div className="flex flex-col justify-center items-center ">
-      <Tabs className="w-full " defaultValue="search">
-        <TabsList className="w-full">
-          <TabsTrigger onClick={() => setTab(1)} value="search">
-            <Search />
-            Search Library
+      <Tabs defaultValue="search" className="w-full">
+        <TabsList className="w-full py-6">
+          <TabsTrigger
+            value="search"
+            className="py-5 text-lg flex items-center gap-2"
+          >
+            <Search className="w-6 h-6 shrink-0" /> Search Library
           </TabsTrigger>
-          <TabsTrigger onClick={() => setTab(2)} value="add">
-            <Plus />
-            Add a new item
+          <TabsTrigger
+            value="add"
+            className="py-5 text-lg flex items-center gap-2"
+          >
+            <Plus className="w-6 h-6 shrink-0" /> Add Item
           </TabsTrigger>
         </TabsList>
-      </Tabs>
-      {tab === 1 ? (
-        <div className="w-full">
-          <Input placeholder="search item..." />
-          <ul>
-            <ScrollArea className="w-full h-140">
-              {items.map((el) => (
-                <li key={el.id}>
-                  <div className="flex items-center gap-4">
-                    <div className="w-[100px] h-[100px]">
-                      <Image
-                        src={el.imageUrl}
-                        alt={el.name}
-                        width={100}
-                        height={100}
-                        className="w-auto h-auto object-cover"
-                      />
-                    </div>
-                    <p>{el.name}</p>
-                  </div>
-                  <div>
-                    <Button>Pick</Button>
-                  </div>
-                  <Separator />
-                </li>
-              ))}
-            </ScrollArea>
-          </ul>
-        </div>
-      ) : (
-        <div className="w-full py-4">
-          <div className="space-y-2">
-            <Label htmlFor="item-name" className="text-foreground">
-              Item Name
-            </Label>
-            <Input
-              id="item-name"
-              placeholder="e.g. Lionel Messi"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="border-border focus:border-primary bg-background py-6"
-              required
-            />
-          </div>
 
-          <div className="space-y-2 pt-4">
-            <Label htmlFor="item-image" className="text-foreground ">
-              Image URL
-            </Label>
-            <div className="relative flex items-center justify-between">
+        <TabsContent value="search">
+          <div className="w-full py-4">
+            <ButtonGroup className="w-full ">
               <Input
-                id="item-image"
-                type="url"
-                placeholder="https://example.com/photo.jpg"
-                value={formData.imageUrl}
+                className="mb-6 py-6 bg-background"
+                value={searchQuerry}
+                onChange={(e) => setSearchQuerry(e.target.value)}
+                placeholder="search item..."
+              />
+              <Button className="py-6" variant="default" aria-label="Search">
+                <SearchIcon />
+              </Button>
+            </ButtonGroup>
+
+            <ScrollArea className="w-full h-80">
+              <ul className="w-full flex flex-col gap-2">
+                {items.map((el) => (
+                  <li
+                    key={el.id}
+                    className="bg-background hover:bg-accent p-4 rounded-md"
+                  >
+                    <div className="w-full flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-[60px] h-[60px]">
+                          <Image
+                            src={el.imageUrl}
+                            alt={el.name}
+                            width={100}
+                            height={100}
+                            className="w-auto h-auto object-cover"
+                          />
+                        </div>
+                        <p>{el.name}</p>
+                      </div>
+                      <div>
+                        <Button>Pick</Button>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </ScrollArea>
+          </div>{" "}
+        </TabsContent>
+
+        <TabsContent value="add">
+          <div className="w-full py-4">
+            <div className="space-y-2">
+              <Label htmlFor="item-name" className="text-foreground">
+                Item Name
+              </Label>
+              <Input
+                id="item-name"
+                placeholder="e.g. Lionel Messi"
+                value={formData.name}
                 onChange={(e) =>
-                  setFormData({ ...formData, imageUrl: e.target.value })
+                  setFormData({ ...formData, name: e.target.value })
                 }
                 className="border-border focus:border-primary bg-background py-6"
+                required
               />
-              <div className="absolute right-4 flex items-center gap-2">
-                {imagesBrands.map(({ name, color, link, svg }) => (
-                  <Button
-                    asChild
-                    key={name}
-                    className="text-[12px] font-bold capitalize rounded-full py-2 px-4 h-8"
-                    style={{ background: `${color}` }}
-                  >
-                    <Link
-                      href={link}
-                      target="_blank"
-                      prefetch={true}
-                      className={`flex items-center gap-2`}
-                      rel="noopener noreferrer"
-                    >
-                      {name}
-                      <div className=" invert-100">{svg}</div>
-                    </Link>
-                  </Button>
-                ))}
-              </div>
             </div>
 
-            <p className="text-xs text-muted-foreground italic">
-              Leave empty for default placeholder.
-            </p>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center justify-between gap-8 py-2">
-              <Label
-                htmlFor="public-toggle"
-                className="cursor-pointer text-primary font-bold"
-              >
-                Make Public ?
+            <div className="space-y-2 pt-4">
+              <Label htmlFor="item-image" className="text-foreground ">
+                Image URL
               </Label>
-              <Switch
-                id="public-toggle"
-                checked={formData.isPublic}
-                onCheckedChange={(checked: boolean) =>
-                  setFormData({ ...formData, isPublic: checked })
-                }
-              />
-              <p className="text-xs font-medium italic text-muted-foreground">
-                {fullDate}
+              <div className="relative flex items-center justify-between">
+                <Input
+                  id="item-image"
+                  type="url"
+                  placeholder="https://example.com/photo.jpg"
+                  value={formData.imageUrl}
+                  onChange={(e) =>
+                    setFormData({ ...formData, imageUrl: e.target.value })
+                  }
+                  className="border-border focus:border-primary bg-background py-6"
+                />
+                <div className="absolute right-4 flex items-center gap-2">
+                  {imagesBrands.map(({ name, color, link, svg }) => (
+                    <Button
+                      asChild
+                      key={name}
+                      className="text-[12px] font-bold capitalize rounded-full py-2 px-4 h-8"
+                      style={{ background: `${color}` }}
+                    >
+                      <Link
+                        href={link}
+                        target="_blank"
+                        prefetch={true}
+                        className={`flex items-center gap-2`}
+                        rel="noopener noreferrer"
+                      >
+                        {name}
+                        <div className=" invert-100">{svg}</div>
+                      </Link>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground italic">
+                Leave empty for default placeholder.
               </p>
             </div>
-            <Button className="px-8 font-bold">Add Item</Button>
-          </div>
-        </div>
-      )}
+            <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between gap-8 py-2">
+                <Label
+                  htmlFor="public-toggle"
+                  className="cursor-pointer text-primary font-bold"
+                >
+                  Make Public ?
+                </Label>
+                <Switch
+                  id="public-toggle"
+                  checked={formData.isPublic}
+                  onCheckedChange={(checked: boolean) =>
+                    setFormData({ ...formData, isPublic: checked })
+                  }
+                />
+                <p className="text-xs font-medium italic text-muted-foreground">
+                  {fullDate}
+                </p>
+              </div>
+              <Button className="px-8 font-bold">Add Item</Button>
+            </div>
+          </div>{" "}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
