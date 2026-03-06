@@ -25,10 +25,10 @@ const Signature = () => {
       <div className="flex flex-col items-center gap-2">
         <Image
           src="/icons/signature.png"
-          alt="badge image"
+          alt="signature image"
           width={400}
           height={400}
-          className=""
+          className="dark:invert-100 "
         />
         <p className="text-[8px] text-center text-foreground font-bold -mt-7">
           <span className="text-primary ">{"founder "}</span>B. Abderrahmane
