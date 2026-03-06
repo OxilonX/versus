@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 //local comps imports
 //icons imports
 import { Plus, Search } from "lucide-react";
@@ -15,39 +15,54 @@ import Image from "next/image";
 //next imports
 
 import Link from "next/link";
-const CreateChallengeItem = () => {
+const CreateChallengeItem = ({ itemNumber = "first" }) => {
   const imagesBrands = [
     {
       svg: (
-        <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          style={{ width: 12 }}
+          role="img"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <title>Unsplash</title>
           <path d="M7.5 6.75V0h9v6.75h-9zm9 3.75H24V24H0V10.5h7.5v6.75h9V10.5z" />
         </svg>
       ),
       name: "unsplash",
-      link: "unsplash.com",
+      link: "https://unsplash.com",
       color: "#000000",
     },
     {
       svg: (
-        <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          style={{ width: 12 }}
+          role="img"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <title>Pixabay</title>
           <path d="M2 0a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm10.193 5.5h2.499l1.967 2.872L18.854 5.5h2.482l-3.579 4.592 3.91 4.813h-2.638l-2.395-3.064-2.15 3.064h-2.579l3.579-4.813zm-5.045.004c1.32.033 2.42.49 3.3 1.371.879.881 1.335 1.986 1.37 3.317-.035 1.331-.491 2.441-1.37 3.328-.88.887-1.98 1.346-3.3 1.38H4.346v3.768H2.5v-8.476c.032-1.33.486-2.436 1.359-3.317.873-.88 1.97-1.338 3.29-1.37Zm0 1.864c-.797.02-1.46.294-1.985.823-.525.53-.797 1.196-.817 2v2.847h2.802c.808-.019 1.476-.294 2.003-.826.528-.532.8-1.206.82-2.02-.02-.805-.292-1.47-.82-2-.527-.53-1.195-.805-2.003-.824Z" />
         </svg>
       ),
       name: "pixabay",
-      link: "pixabay.com",
+      link: "https://pixabay.com",
       color: "#191B26",
     },
     {
       svg: (
-        <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          style={{ width: 12 }}
+          role="img"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <title>Pexels</title>
           <path d="M1.5 0A1.5 1.5 0 000 1.5v21A1.5 1.5 0 001.5 24h21a1.5 1.5 0 001.5-1.5v-21A1.5 1.5 0 0022.5 0h-21zm6.75 6.75h5.2715a3.843 3.843 0 01.627 7.6348V17.25H8.25V6.75zm1.5 1.5v7.5h2.8984v-2.8145h.873a2.343 2.343 0 100-4.6855H9.75Z" />
         </svg>
       ),
       name: "pexels",
-      link: "pexels.com",
+      link: "https://pexels.com",
       color: "#05A081",
     },
   ];
@@ -88,6 +103,11 @@ const CreateChallengeItem = () => {
       isPublic: true,
     },
   ]);
+  const [fullDate, setFullDate] = useState(new Date().toISOString());
+  useEffect(() => {
+    const now = new Date().toISOString();
+    setFullDate(now);
+  }, []);
   const [tab, setTab] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
@@ -95,9 +115,9 @@ const CreateChallengeItem = () => {
     isPublic: true,
   });
   return (
-    <div>
-      <Tabs defaultValue="search">
-        <TabsList>
+    <div className="flex flex-col justify-center items-center ">
+      <Tabs className="w-full " defaultValue="search">
+        <TabsList className="w-full">
           <TabsTrigger onClick={() => setTab(1)} value="search">
             <Search />
             Search Library
@@ -109,7 +129,7 @@ const CreateChallengeItem = () => {
         </TabsList>
       </Tabs>
       {tab === 1 ? (
-        <div>
+        <div className="w-full">
           <Input placeholder="search item..." />
           <ul>
             <ScrollArea className="w-full h-140">
@@ -137,7 +157,7 @@ const CreateChallengeItem = () => {
           </ul>
         </div>
       ) : (
-        <div>
+        <div className="w-full py-4">
           <div className="space-y-2">
             <Label htmlFor="item-name" className="text-foreground">
               Item Name
@@ -149,16 +169,16 @@ const CreateChallengeItem = () => {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="border-border focus:border-primary bg-background"
+              className="border-border focus:border-primary bg-background py-6"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="item-image" className="text-foreground">
+          <div className="space-y-2 pt-4">
+            <Label htmlFor="item-image" className="text-foreground ">
               Image URL
             </Label>
-            <div className="flex items-center justify-between">
+            <div className="relative flex items-center justify-between">
               <Input
                 id="item-image"
                 type="url"
@@ -167,17 +187,25 @@ const CreateChallengeItem = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, imageUrl: e.target.value })
                 }
-                className="border-border focus:border-primary bg-background"
+                className="border-border focus:border-primary bg-background py-6"
               />
-              <div className="flex items-center gap-2">
+              <div className="absolute right-4 flex items-center gap-2">
                 {imagesBrands.map(({ name, color, link, svg }) => (
-                  <Button key={name}>
+                  <Button
+                    asChild
+                    key={name}
+                    className="text-[12px] font-bold capitalize rounded-full py-2 px-4 h-8"
+                    style={{ background: `${color}` }}
+                  >
                     <Link
                       href={link}
-                      className={`flex items-center gap-2 bg-[${color}]`}
+                      target="_blank"
+                      prefetch={true}
+                      className={`flex items-center gap-2`}
+                      rel="noopener noreferrer"
                     >
                       {name}
-                      <div className="w-4 h-4">{svg}</div>
+                      <div className=" invert-100">{svg}</div>
                     </Link>
                   </Button>
                 ))}
@@ -188,18 +216,26 @@ const CreateChallengeItem = () => {
               Leave empty for default placeholder.
             </p>
           </div>
-
-          <div className="flex items-center justify-between py-2">
-            <Label htmlFor="public-toggle" className="cursor-pointer">
-              Make Public?
-            </Label>
-            <Switch
-              id="public-toggle"
-              checked={formData.isPublic}
-              onCheckedChange={(checked: boolean) =>
-                setFormData({ ...formData, isPublic: checked })
-              }
-            />
+          <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between gap-8 py-2">
+              <Label
+                htmlFor="public-toggle"
+                className="cursor-pointer text-primary font-bold"
+              >
+                Make Public ?
+              </Label>
+              <Switch
+                id="public-toggle"
+                checked={formData.isPublic}
+                onCheckedChange={(checked: boolean) =>
+                  setFormData({ ...formData, isPublic: checked })
+                }
+              />
+              <p className="text-xs font-medium italic text-muted-foreground">
+                {fullDate}
+              </p>
+            </div>
+            <Button className="px-8 font-bold">Add Item</Button>
           </div>
         </div>
       )}

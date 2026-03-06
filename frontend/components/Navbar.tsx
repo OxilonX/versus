@@ -19,15 +19,16 @@ const Navbar = () => {
   const router = useRouter();
   return (
     <header className="bg-background  container mx-auto max-w-275 px-4 sticky   py-3  flex justify-between items-center">
-      <Image
-        onClick={() => router.push("/")}
-        src="/icons/versus_logo_final_small_2.svg"
-        alt="Versus Logo"
-        width={50}
-        height={50}
-        priority
-        className="h-auto mt-0.5  dark:invert-100 cursor-pointer"
-      />
+      <Link href={"/"}>
+        <Image
+          src="/icons/versus_logo_final_small_2.svg"
+          alt="Versus Logo"
+          width={50}
+          height={50}
+          priority
+          className="h-auto mt-0.5  dark:invert-100 cursor-pointer"
+        />
+      </Link>
 
       <nav className="flex items-center gap-8">
         <ul className="flex items-center gap-8">

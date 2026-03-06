@@ -33,9 +33,6 @@ const CreateChallengeForm = () => {
                 <CreateChallengeItem />
               </div>
             </CardContent>
-            <CardFooter>
-              <p>Card Footer</p>
-            </CardFooter>
           </Card>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Facebook, Github, Instagram, Twitter, Youtube } from "lucide-react";
 const Footer = () => {
   const footerNavs = [
@@ -60,7 +61,7 @@ const Footer = () => {
             <ul className="flex items-center gap-2">
               {socialIcons.map((social, idx) => (
                 <li key={idx}>
-                  <a
+                  <Link
                     href={social.href}
                     aria-label={social.label}
                     className="flex h-9 w-9 bg-muted text-pretty items-center
@@ -70,7 +71,7 @@ const Footer = () => {
                        hover:border-primary/70 active:scale-95"
                   >
                     {social.icon}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

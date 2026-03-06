@@ -19,7 +19,7 @@ export default function RootLayout({
         <main className="bg-background  container mx-auto max-w-275 px-4">
           {children}
         </main>
-          <Footer />
+        <Footer />
       </ThemeProvider>
     </div>
   );
