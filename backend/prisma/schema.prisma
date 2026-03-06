@@ -15,10 +15,12 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  sessions   Session[]
-  accounts   Account[]
-  items      Item[]
-  challenges Challenge[]
+  sessions  Session[]
+  accounts  Account[]
+  items     Item[]
+  challenge Challenge[]
+  like      Like[]
+  votes     Vote[]
 
   @@map("user")
 }
@@ -91,7 +93,9 @@ model Challenge {
   userId    String
   user      User            @relation(fields: [userId], references: [id])
   items     ChallengeItem[]
+  like      Like[]
   createdAt DateTime        @default(now())
+  votes     Vote[]
 
   @@map("challenge")
 }
@@ -106,6 +110,7 @@ model Item {
   user   User   @relation(fields: [userId], references: [id])
 
   challenges ChallengeItem[]
+  votes      Vote[]
 
   @@map("item")
 }
@@ -117,4 +122,35 @@ model ChallengeItem {
   item        Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
   @@id([challengeId, itemId])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, challengeId])
+  @@map("like")
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  itemId String
+  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, challengeId])
+  @@map("votes")
 }

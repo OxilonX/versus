@@ -1,14 +1,15 @@
 import { Router } from "express";
 import {
-  createPost,
-  getPosts,
-  getPostById,
+  createChallenge,
+  getChallenges,
+  getChallengeById,
 } from "../controllers/challengesController.js";
+import { protectRoute } from "../middleware/protectRoute.js";
 
 const router = Router();
 
-router.post("/posts", createPost);
-router.get("/posts", getPosts);
-router.get("/posts/:id", getPostById);
+router.post("/", protectRoute, createChallenge);
+router.get("/", getChallenges);
+router.get("/:id", getChallengeById);
 
 export default router;

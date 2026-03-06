@@ -1,63 +1,68 @@
+import { User } from "better-auth";
 import { prisma } from "../lib/prisma.js";
 import type { Request, Response } from "express";
-
-export const createPost = async (req: Request, res: Response) => {
+export const createChallenge = async (req: Request, res: Response) => {
   try {
-    const { title, content, published = false } = req.body;
+    const { title, items } = req.body;
+    const user = req.user;
 
-    if (!title) {
-      res.status(400).json({ error: "Title is required" });
-      return;
+    if (!user?.id) return res.status(401).json({ error: "User ID missing" });
+    if (!title) return res.status(400).json({ error: "Title is required" });
+    if (!items || items.length !== 2) {
+      return res.status(400).json({ error: "Exactly 2 items are required" });
     }
 
-    const post = await prisma.post.create({
+    const challenge = await prisma.challenge.create({
       data: {
         title,
-        content,
-        published,
+        user: { connect: { id: user.id } },
+        items: {
+          create: items.map((item: { itemId: string }) => ({
+            item: { connect: { id: item.itemId } },
+          })),
+        },
+      },
+      include: {
+        items: {
+          include: { item: true },
+        },
       },
     });
 
-    res.status(201).json(post);
-  } catch (error) {
-    console.error("Error creating post:", error);
-    res.status(500).json({ error: "Failed to create post" });
+    res.status(201).json(challenge);
+  } catch (error: any) {
+    console.error("Prisma Error:", error);
+    if (error.code === "P2025") {
+      return res.status(404).json({ error: "One or more Item IDs not found" });
+    }
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-export const getPosts = async (req: Request, res: Response) => {
+export const getChallenges = async (req: Request, res: Response) => {
   try {
-    const { published } = req.query;
-
-    const where =
-      published !== undefined ? { published: published === "true" } : {};
-
-    const posts = await prisma.post.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-    });
-
-    res.json(posts);
+    const challenges = await prisma.challenge.findMany();
+    res.json(challenges);
   } catch (error) {
     console.error("Error fetching posts:", error);
     res.status(500).json({ error: "Failed to fetch posts" });
   }
 };
 
-export const getPostById = async (req: Request, res: Response) => {
+export const getChallengeById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const post = await prisma.post.findUnique({
+    const challenges = await prisma.challenge.findUnique({
       where: { id: id as string },
     });
 
-    if (!post) {
+    if (!challenges) {
       res.status(404).json({ error: "Post not found" });
       return;
     }
 
-    res.json(post);
+    res.json(challenges);
   } catch (error) {
     console.error("Error fetching post:", error);
     res.status(500).json({ error: "Failed to fetch post" });

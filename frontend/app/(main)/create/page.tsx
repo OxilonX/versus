@@ -1,5 +1,12 @@
+"use client";
+import CreateChallengeForm from "@/components/CreateChallengeForm";
+
 const CreatePage = () => {
-  return <div>CreatePage</div>;
+  return (
+    <div className="py-8">
+      <CreateChallengeForm />
+    </div>
+  );
 };
 
 export default CreatePage;

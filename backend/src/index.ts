@@ -3,7 +3,10 @@ import express from "express";
 import cors from "cors";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
-import postRouter from "./routes/challengesRoute.js";
+//routes imports
+import challengesRouter from "./routes/challengesRoute.js";
+import usersRouter from "./routes/usersRoute.js";
+import itemsRouter from "./routes/itemsRoute.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -20,8 +23,9 @@ app.all("/api/auth/*", toNodeHandler(auth));
 
 app.use(express.json());
 
-app.use("/api", postRouter);
-
+app.use("/api/challenges", challengesRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/items", itemsRouter);
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
