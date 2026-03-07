@@ -16,12 +16,26 @@ const CreateChallengeForm = () => {
     <div>
       <div>
         <div>
-          <Input />
+          <Input placeholder="Challenge name" />
         </div>
-        <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-4">
           <Card>
             <CardHeader>
               <CardTitle>First Item</CardTitle>
+              <CardDescription>
+                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                Aliquam, sit?
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div>
+                <CreateChallengeItem />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Second Item</CardTitle>
               <CardDescription>
                 Lorem ipsum dolor, sit amet consectetur adipisicing elit.
                 Aliquam, sit?

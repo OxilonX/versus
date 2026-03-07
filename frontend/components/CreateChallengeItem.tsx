@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 //local comps imports
 //icons imports
 import { Plus, Search } from "lucide-react";
@@ -14,7 +14,6 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import { SearchIcon } from "lucide-react";
 import Image from "next/image";
 //next imports
-
 import Link from "next/link";
 const CreateChallengeItem = () => {
   const imagesBrands = [
@@ -104,11 +103,7 @@ const CreateChallengeItem = () => {
       isPublic: true,
     },
   ]);
-  const [fullDate, setFullDate] = useState<string>("");
-  useEffect(() => {
-    const now = new Date().toISOString();
-    setFullDate(now);
-  }, []);
+  const [fullDate, setFullDate] = useState<string>(new Date().toISOString());
   const [formData, setFormData] = useState({
     name: "",
     imageUrl: "",
@@ -197,21 +192,11 @@ const CreateChallengeItem = () => {
             </div>
 
             <div className="space-y-2 pt-4">
-              <Label htmlFor="item-image" className="text-foreground ">
-                Image URL
-              </Label>
-              <div className="relative flex items-center justify-between">
-                <Input
-                  id="item-image"
-                  type="url"
-                  placeholder="https://example.com/photo.jpg"
-                  value={formData.imageUrl}
-                  onChange={(e) =>
-                    setFormData({ ...formData, imageUrl: e.target.value })
-                  }
-                  className="border-border focus:border-primary bg-background py-6"
-                />
-                <div className="absolute right-4 flex items-center gap-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="item-image" className="text-foreground ">
+                  Image URL
+                </Label>
+                <div className="flex items-center gap-2">
                   {imagesBrands.map(({ name, color, link, svg }) => (
                     <Button
                       asChild
@@ -233,6 +218,18 @@ const CreateChallengeItem = () => {
                   ))}
                 </div>
               </div>
+              <div className="relative flex items-center justify-between">
+                <Input
+                  id="item-image"
+                  type="url"
+                  placeholder="https://example.com/photo.jpg"
+                  value={formData.imageUrl}
+                  onChange={(e) =>
+                    setFormData({ ...formData, imageUrl: e.target.value })
+                  }
+                  className="border-border focus:border-primary bg-background py-6"
+                />
+              </div>
 
               <p className="text-xs text-muted-foreground italic">
                 Leave empty for default placeholder.
@@ -253,13 +250,22 @@ const CreateChallengeItem = () => {
                     setFormData({ ...formData, isPublic: checked })
                   }
                 />
-                <p className="text-xs font-medium italic text-muted-foreground">
+                <p className="text-xs font-medium italic text-muted-foreground" suppressHydrationWarning>
                   {fullDate}
                 </p>
               </div>
               <Button className="px-8 font-bold">Add Item</Button>
             </div>
-          </div>{" "}
+            <div>
+              <h3>Preview</h3>
+              <Image
+                src={"/images/default_item.jpeg"}
+                alt={formData.name || "item name ..."}
+                width={100}
+                height={100}
+              />
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
