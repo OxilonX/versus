@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 //local comps imports
 //icons imports
 import { Plus, Search } from "lucide-react";
@@ -15,6 +15,43 @@ import { SearchIcon } from "lucide-react";
 import Image from "next/image";
 //next imports
 import Link from "next/link";
+
+const DEFAULT_IMAGE = "/images/default_item_v1.jpeg";
+
+const isValidImageSrc = (url: string): boolean => {
+  if (!url) return false;
+
+  const invalidPatterns = ["pexels.com/photo/", "unsplash.com/photos/"];
+  if (invalidPatterns.some((pattern) => url.includes(pattern))) {
+    return false;
+  }
+
+  const validExtensions = [
+    ".jpg",
+    ".jpeg",
+    ".webp",
+    ".png",
+    ".gif",
+    ".svg",
+    ".avif",
+  ];
+  const hasValidExtension = validExtensions.some((ext) =>
+    url.toLowerCase().endsWith(ext),
+  );
+
+  const validSubdomains = [
+    "images.unsplash.com",
+    "pixabay.com",
+    "cdn.pixabay.com",
+    "images.pexels.com",
+  ];
+  const hasValidSubdomain = validSubdomains.some((subdomain) =>
+    url.includes(subdomain),
+  );
+
+  return hasValidExtension || hasValidSubdomain;
+};
+
 const CreateChallengeItem = () => {
   const imagesBrands = [
     {
@@ -110,65 +147,67 @@ const CreateChallengeItem = () => {
     isPublic: true,
   });
   const [searchQuerry, setSearchQuerry] = useState("");
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    const isPageUrl =
-      val.includes("pexels.com/photo") ||
-      val.includes("unsplash.com/photos") ||
-      val.includes("pixabay.com/photos");
+  const [hasError, setHasError] = useState(false);
 
-    setFormData({ ...formData, imageUrl: val });
+  const getImageSrc = useMemo(() => {
+    return (url: string) => {
+      if (!url || !isValidImageSrc(url) || hasError) {
+        return DEFAULT_IMAGE;
+      }
+      return url;
+    };
+  }, [hasError]);
 
-    if (isPageUrl) {
-      console.log(
-        "Wrong Link Type: Use 'Copy Image Address' instead of the browser URL bar.",
-      );
-    }
-  };
   return (
     <div className="flex flex-col justify-center items-center ">
       <Tabs defaultValue="search" className="w-full">
         <TabsList className="w-full py-6">
           <TabsTrigger
             value="search"
-            className="py-5 text-lg flex items-center gap-2"
+            className="py-5 text-lg flex items-center gap-2 cursor-pointer"
           >
             <Search className="w-6 h-6 shrink-0" /> Search Library
           </TabsTrigger>
           <TabsTrigger
             value="add"
-            className="py-5 text-lg flex items-center gap-2"
+            className="py-5 text-lg flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-6 h-6 shrink-0" /> Add Item
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="search">
-          <div className="w-full py-4">
-            <ButtonGroup className="w-full ">
-              <Input
-                className="mb-6 py-6 bg-background"
-                value={searchQuerry}
-                onChange={(e) => setSearchQuerry(e.target.value)}
-                placeholder="search item..."
-              />
-              <Button className="py-6" variant="default" aria-label="Search">
-                <SearchIcon />
-              </Button>
-            </ButtonGroup>
+          <div className="w-full py-4 ">
+            <div className="space-y-2">
+              <Label htmlFor="search-item" className="text-foreground">
+                Search Item
+              </Label>
+              <ButtonGroup className="w-full ">
+                <Input
+                  id="search-item"
+                  placeholder="e.g. Lionel Messi"
+                  className="mb-6 py-6 bg-background"
+                  value={searchQuerry}
+                  onChange={(e) => setSearchQuerry(e.target.value)}
+                />
+                <Button className="py-6" variant="default" aria-label="Search">
+                  <SearchIcon />
+                </Button>
+              </ButtonGroup>
+            </div>
 
-            <ScrollArea className="w-full h-80">
+            <ScrollArea className="w-full h-90">
               <ul className="w-full flex flex-col gap-2">
                 {items.map((el) => (
                   <li
                     key={el.id}
-                    className="bg-background hover:bg-accent p-4 rounded-md"
+                    className="bg-background dark:bg-accent dark:hover:bg-card hover:bg-accent p-4 rounded-md"
                   >
                     <div className="w-full flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-[60px] h-[60px]">
                           <Image
-                            src={el.imageUrl}
+                            src={getImageSrc(el.imageUrl)}
                             alt={el.name}
                             width={100}
                             height={100}
@@ -239,8 +278,16 @@ const CreateChallengeItem = () => {
                   type="url"
                   placeholder="Use Copy Image Address to get a direct link "
                   value={formData.imageUrl}
-                  onChange={(e) => handleUrlChange(e)}
-                  className="border-border focus:border-primary bg-background py-6"
+                  onChange={(e) => {
+                    setHasError(false);
+                    setFormData((prev) => ({
+                      ...prev,
+                      imageUrl: e.target.value,
+                    }));
+                  }}
+                  className={`border-border focus:border-primary bg-background py-6 ${
+                    hasError && formData.imageUrl ? "border-red-500" : ""
+                  }`}
                 />
               </div>
 
@@ -252,7 +299,7 @@ const CreateChallengeItem = () => {
               <div className="flex items-center justify-between gap-8 py-2">
                 <Label
                   htmlFor="public-toggle"
-                  className="cursor-pointer text-primary font-bold"
+                  className="cursor-pointer text-primary font-bold text-nowrap"
                 >
                   Make Public ?
                 </Label>
@@ -263,12 +310,6 @@ const CreateChallengeItem = () => {
                     setFormData({ ...formData, isPublic: checked })
                   }
                 />
-                <p
-                  className="text-xs font-medium italic text-muted-foreground"
-                  suppressHydrationWarning
-                >
-                  {fullDate}
-                </p>
               </div>
               <Button className="px-8 font-bold">Add Item</Button>
             </div>
@@ -276,40 +317,45 @@ const CreateChallengeItem = () => {
               <h3 className="text-2xl font-bold capitalize text-muted-foreground">
                 Item Preview
               </h3>
-              <div className="flex items-start gap-10">
-                <div className="relative w-[150px] h-[150px] overflow-hidden rounded-md border border-border bg-muted">
+              <div className="flex items-start gap-10 w-full">
+                <div className="relative w-[150px] h-[150px] overflow-hidden rounded-md border border-border bg-muted shrink-0">
                   <Image
-                    src={formData.imageUrl || "/images/default_item_v1.jpeg"}
+                    src={getImageSrc(formData.imageUrl)}
                     alt={formData.name || "item name"}
                     fill
                     className="object-cover transition-opacity duration-300"
                     sizes="200px"
                     priority
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "/images/default_item_v1.jpeg";
-                    }}
+                    onError={() => setHasError(true)}
+                    onLoad={() => setHasError(false)}
                   />
+                  {hasError && formData.imageUrl && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-foreground/20">
+                      <span className="bg-destructive text-muted text-xs font-bold px-2 py-1 rounded">
+                        Invalid URL
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex flex-col overflow-hidden text-ellipsis">
+                <div className="flex flex-col overflow-hidden text-ellipsis min-w-0 flex-1">
                   <h2 className="text-xl font-bold capitalize">
                     item informations :
                   </h2>
                   <ul className="flex flex-col overflow-hidden">
-                    <li className="flex items-center gap-1 ">
+                    <li className="flex items-center gap-1  min-w-0">
                       <span className="text-base text-foreground">name :</span>
                       <p className="text-sm font-medium text-foreground/70">
                         {formData.name || "e.g. Ahmed Draya"}
                       </p>
                     </li>
-                    <li className="flex items-center gap-1 ">
+                    <li className="flex items-center gap-1  min-w-0">
                       <span className="text-base text-foreground">state :</span>
                       <p className="text-sm font-medium text-foreground/70">
                         {formData.isPublic ? "Public" : "Private"}
                       </p>
                     </li>
-                    <li className="flex items-center gap-1 ">
+                    <li className="flex items-center gap-1  min-w-0">
                       <span className="text-base text-foreground">
                         created at:
                       </span>
@@ -320,7 +366,7 @@ const CreateChallengeItem = () => {
                         {fullDate}
                       </p>
                     </li>
-                    <li className="flex items-center gap-1 ">
+                    <li className="flex items-center gap-1  min-w-0">
                       <span className="text-base text-foreground whitespace-nowrap">
                         image url :
                       </span>
