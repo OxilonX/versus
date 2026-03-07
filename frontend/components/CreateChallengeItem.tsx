@@ -110,6 +110,21 @@ const CreateChallengeItem = () => {
     isPublic: true,
   });
   const [searchQuerry, setSearchQuerry] = useState("");
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const isPageUrl =
+      val.includes("pexels.com/photo") ||
+      val.includes("unsplash.com/photos") ||
+      val.includes("pixabay.com/photos");
+
+    setFormData({ ...formData, imageUrl: val });
+
+    if (isPageUrl) {
+      console.log(
+        "Wrong Link Type: Use 'Copy Image Address' instead of the browser URL bar.",
+      );
+    }
+  };
   return (
     <div className="flex flex-col justify-center items-center ">
       <Tabs defaultValue="search" className="w-full">
@@ -222,11 +237,9 @@ const CreateChallengeItem = () => {
                 <Input
                   id="item-image"
                   type="url"
-                  placeholder="https://example.com/photo.jpg"
+                  placeholder="Use Copy Image Address to get a direct link "
                   value={formData.imageUrl}
-                  onChange={(e) =>
-                    setFormData({ ...formData, imageUrl: e.target.value })
-                  }
+                  onChange={(e) => handleUrlChange(e)}
                   className="border-border focus:border-primary bg-background py-6"
                 />
               </div>
@@ -250,20 +263,74 @@ const CreateChallengeItem = () => {
                     setFormData({ ...formData, isPublic: checked })
                   }
                 />
-                <p className="text-xs font-medium italic text-muted-foreground" suppressHydrationWarning>
+                <p
+                  className="text-xs font-medium italic text-muted-foreground"
+                  suppressHydrationWarning
+                >
                   {fullDate}
                 </p>
               </div>
               <Button className="px-8 font-bold">Add Item</Button>
             </div>
-            <div>
-              <h3>Preview</h3>
-              <Image
-                src={"/images/default_item.jpeg"}
-                alt={formData.name || "item name ..."}
-                width={100}
-                height={100}
-              />
+            <div className="flex flex-col gap-4 pt-4">
+              <h3 className="text-2xl font-bold capitalize text-muted-foreground">
+                Item Preview
+              </h3>
+              <div className="flex items-start gap-10">
+                <div className="relative w-[150px] h-[150px] overflow-hidden rounded-md border border-border bg-muted">
+                  <Image
+                    src={formData.imageUrl || "/images/default_item_v1.jpeg"}
+                    alt={formData.name || "item name"}
+                    fill
+                    className="object-cover transition-opacity duration-300"
+                    sizes="200px"
+                    priority
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/images/default_item_v1.jpeg";
+                    }}
+                  />
+                </div>
+
+                <div className="flex flex-col overflow-hidden text-ellipsis">
+                  <h2 className="text-xl font-bold capitalize">
+                    item informations :
+                  </h2>
+                  <ul className="flex flex-col overflow-hidden">
+                    <li className="flex items-center gap-1 ">
+                      <span className="text-base text-foreground">name :</span>
+                      <p className="text-sm font-medium text-foreground/70">
+                        {formData.name || "e.g. Ahmed Draya"}
+                      </p>
+                    </li>
+                    <li className="flex items-center gap-1 ">
+                      <span className="text-base text-foreground">state :</span>
+                      <p className="text-sm font-medium text-foreground/70">
+                        {formData.isPublic ? "Public" : "Private"}
+                      </p>
+                    </li>
+                    <li className="flex items-center gap-1 ">
+                      <span className="text-base text-foreground">
+                        created at:
+                      </span>
+                      <p
+                        className="normal text-[13px] font-medium text-foreground/70 "
+                        suppressHydrationWarning
+                      >
+                        {fullDate}
+                      </p>
+                    </li>
+                    <li className="flex items-center gap-1 ">
+                      <span className="text-base text-foreground whitespace-nowrap">
+                        image url :
+                      </span>
+                      <p className="text-sm font-medium text-foreground/70  truncate w-[60%]">
+                        {formData.imageUrl || "image.example.com"}
+                      </p>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </TabsContent>

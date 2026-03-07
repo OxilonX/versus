@@ -19,7 +19,7 @@ const CreateChallengeForm = () => {
           <Input placeholder="Challenge name" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-4">
-          <Card>
+          <Card className="h-160">
             <CardHeader>
               <CardTitle>First Item</CardTitle>
               <CardDescription>
@@ -33,7 +33,7 @@ const CreateChallengeForm = () => {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="h-160">
             <CardHeader>
               <CardTitle>Second Item</CardTitle>
               <CardDescription>
