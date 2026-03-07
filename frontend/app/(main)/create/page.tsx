@@ -4,6 +4,7 @@ import CreateChallengeForm from "@/components/CreateChallengeForm";
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function CreatePage() {
   const { data: session, isPending } = useSession();
@@ -17,7 +18,10 @@ export default function CreatePage() {
   if (!mounted || isPending) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse">Loading...</div>
+        <div className="animate-pulse flex items-center gap-4">
+          <Spinner className="size-8" />{" "}
+          <span className="text-lg font-medium">Loading ...</span>
+        </div>
       </div>
     );
   }
@@ -28,7 +32,10 @@ export default function CreatePage() {
     }
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse">Redirecting...</div>
+        <div className="animate-pulse flex items-center gap-4">
+          <Spinner className="size-8" />
+          <span className="text-lg font-medium">Redirecting ...</span>
+        </div>
       </div>
     );
   }
