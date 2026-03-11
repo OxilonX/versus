@@ -7,6 +7,7 @@ import { Plus, Search } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -111,34 +112,6 @@ const CreateChallengeItem = () => {
         "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=200&h=200&fit=crop",
       isPublic: true,
     },
-    {
-      id: "clx123002",
-      name: "Next.js",
-      imageUrl:
-        "https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=200&h=200&fit=crop",
-      isPublic: true,
-    },
-    {
-      id: "clx123005",
-      name: "TypeScript",
-      imageUrl:
-        "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=200&h=200&fit=crop",
-      isPublic: true,
-    },
-    {
-      id: "clx123006",
-      name: "Tailwind CSS",
-      imageUrl:
-        "https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=200&h=200&fit=crop",
-      isPublic: true,
-    },
-    {
-      id: "clx123007",
-      name: "Prisma",
-      imageUrl:
-        "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=200&h=200&fit=crop",
-      isPublic: true,
-    },
   ]);
   const [fullDate, setFullDate] = useState<string>(new Date().toISOString());
   const [formData, setFormData] = useState({
@@ -157,7 +130,36 @@ const CreateChallengeItem = () => {
       return url;
     };
   }, [hasError]);
+  const handleAddItem = async () => {
+    if (!formData?.name.trim()) {
+      return toast.warning("Item name is required", {
+        position: "bottom-right",
+      });
+    }
+    const createItemRequest = async () => {
+      const response = await fetch("/api/items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(data.error || "Server rejected the item");
+      }
+
+      setItems((prev) => [data, ...prev]);
+      setFormData({ name: "", imageUrl: "", isPublic: true });
+      return data;
+    };
+
+    toast.promise(createItemRequest(), {
+      loading: "Saving to your library...",
+      success: (data) => `${data.name} has been created successfully!`,
+      error: (err) => `Error: ${err.message}`,
+    });
+  };
   return (
     <div className="flex flex-col justify-center items-center ">
       <Tabs defaultValue="search" className="w-full">
@@ -311,7 +313,9 @@ const CreateChallengeItem = () => {
                   }
                 />
               </div>
-              <Button className="px-8 font-bold">Add Item</Button>
+              <Button onClick={handleAddItem} className="px-8 font-bold">
+                Add Item
+              </Button>
             </div>
             <div className="flex flex-col gap-4 pt-4">
               <h3 className="text-2xl font-bold capitalize text-muted-foreground">
