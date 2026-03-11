@@ -6,10 +6,37 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CreateChallengeItem from "./CreateChallengeItem";
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
 //local comps imports
 const CreateChallengeForm = () => {
   const [challengeInput, setChallengeInput] = useState("");
+  const [firstItemId, setFirstItemId] = useState<string>("");
+  const [secondnItemId, setSecondItemId] = useState<string>("");
+  const setFirst = useCallback((id: string) => setFirstItemId(id), []);
+  const setSecond = useCallback((id: string) => setSecondItemId(id), []);
+  const initChallengeHandleClick = async () => {
+    if (!challengeInput.trim()) return "no name";
+    if (!(firstItemId || secondnItemId)) return "missing item id problem";
+    const bodyData = {
+      title: challengeInput,
+      items: [{ itemId: firstItemId }, { itemId: secondnItemId }],
+    };
+    try {
+      const response = await fetch("/api/challenges/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(bodyData),
+      });
+      const data = await response.json();
+      if (!response.ok) return "error server";
+      console.log(data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <div className="py-15">
       <div className="pb-4">
@@ -39,7 +66,7 @@ const CreateChallengeForm = () => {
             </CardHeader>
             <CardContent>
               <div>
-                <CreateChallengeItem />
+                <CreateChallengeItem setId={setFirst} />
               </div>
             </CardContent>
           </Card>
@@ -49,13 +76,14 @@ const CreateChallengeForm = () => {
             </CardHeader>
             <CardContent>
               <div>
-                <CreateChallengeItem />
+                <CreateChallengeItem setId={setSecond} />
               </div>
             </CardContent>
           </Card>
         </div>
         <div className="pt-4 flex justify-center">
           <Button
+            onClick={initChallengeHandleClick}
             size="lg"
             className="w-full md:w-1/2 py-8 text-2xl font-black uppercase tracking-widest tracking-widest shadow-lg "
           >
@@ -67,4 +95,4 @@ const CreateChallengeForm = () => {
   );
 };
 
-export default CreateChallengeForm;
+export default memo(CreateChallengeForm);

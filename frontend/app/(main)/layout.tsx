@@ -20,7 +20,19 @@ export default function RootLayout({
         <main className="bg-background  container mx-auto max-w-275 px-4">
           {children}
         </main>
-        <Toaster />
+        <Toaster
+          theme="dark"
+          richColors
+          closeButton
+          toastOptions={{
+            style: {
+              background: "var(--card)",
+              color: "var(--foreground)",
+              border: "1px solid var(--border)",
+            },
+            className: "font-sans border-2",
+          }}
+        />
         <Footer />
       </ThemeProvider>
     </div>

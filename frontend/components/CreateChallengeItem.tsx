@@ -1,8 +1,8 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 //local comps imports
 //icons imports
-import { Plus, Search } from "lucide-react";
+import { CheckCircle, Plus, Search } from "lucide-react";
 //shadcn imports
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,14 @@ const isValidImageSrc = (url: string): boolean => {
   return hasValidExtension || hasValidSubdomain;
 };
 
-const CreateChallengeItem = () => {
+interface Item {
+  id: string;
+  name: string;
+  imageUrl: string;
+  isPublic: boolean;
+  userId: string;
+}
+const CreateChallengeItem = ({ setId }) => {
   const imagesBrands = [
     {
       svg: (
@@ -104,15 +111,7 @@ const CreateChallengeItem = () => {
       color: "#000000",
     },
   ];
-  const [items, setItems] = useState([
-    {
-      id: "clx123001",
-      name: "React",
-      imageUrl:
-        "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=200&h=200&fit=crop",
-      isPublic: true,
-    },
-  ]);
+  const [items, setItems] = useState<Item[]>([]);
   const [fullDate, setFullDate] = useState<string>(new Date().toISOString());
   const [formData, setFormData] = useState({
     name: "",
@@ -121,15 +120,82 @@ const CreateChallengeItem = () => {
   });
   const [searchQuerry, setSearchQuerry] = useState("");
   const [hasError, setHasError] = useState(false);
-
-  const getImageSrc = useMemo(() => {
-    return (url: string) => {
-      if (!url || !isValidImageSrc(url) || hasError) {
-        return DEFAULT_IMAGE;
+  const [pickedItem, setPickedItem] = useState("");
+  const getPublicItems = async () => {
+    try {
+      const response = await fetch("/api/items", {
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Server rejected to send public items");
       }
-      return url;
+      return data;
+    } catch (err) {
+      return toast.warning("Error In sending Public Items...", {
+        position: "bottom-right",
+      });
+    }
+  };
+  const getPrivateItems = async () => {
+    try {
+      const response = await fetch("/api/items/private", {
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.warning("Server rejected to send private items", {
+          position: "bottom-right",
+        });
+        throw new Error(data.error || "Server rejected to send private items");
+      }
+      return data;
+    } catch (err) {
+      return toast.warning("Error In sending Private Items...", {
+        position: "bottom-right",
+      });
+    }
+  };
+  useEffect(() => {
+    const fetchItems = async () => {
+      const privateData = await getPrivateItems();
+      const publicData = await getPublicItems();
+      const combined = [
+        ...(Array.isArray(privateData) ? privateData : []),
+        ...(Array.isArray(publicData) ? publicData : []),
+      ];
+
+      setItems(combined);
     };
-  }, [hasError]);
+
+    fetchItems();
+  }, []);
+  const handlePickItemClick = (id: string) => {
+    setPickedItem(id);
+    setId(pickedItem);
+    setItems((prevItems) => {
+      const itemToMove = prevItems.find((item) => item.id === id);
+      if (!itemToMove) return prevItems;
+
+      const remainingItems = prevItems.filter((item) => item.id !== id);
+      return [itemToMove, ...remainingItems];
+    });
+  };
+  const getImageSrc = (url: string | null | undefined): string => {
+    if (!url || typeof url !== "string" || url.trim() === "") {
+      return DEFAULT_IMAGE;
+    }
+
+    if (url === "image.example.com" || !url.startsWith("http")) {
+      return DEFAULT_IMAGE;
+    }
+
+    if (!isValidImageSrc(url) || hasError) {
+      return DEFAULT_IMAGE;
+    }
+
+    return url;
+  };
   const handleAddItem = async () => {
     if (!formData?.name.trim()) {
       return toast.warning("Item name is required", {
@@ -198,28 +264,39 @@ const CreateChallengeItem = () => {
               </ButtonGroup>
             </div>
 
-            <ScrollArea className="w-full h-90">
+            <ScrollArea className="relative w-full h-90 z-10">
               <ul className="w-full flex flex-col gap-2">
                 {items.map((el) => (
                   <li
                     key={el.id}
-                    className="bg-background dark:bg-accent dark:hover:bg-card hover:bg-accent p-4 rounded-md"
+                    className={
+                      el.id === pickedItem
+                        ? "sticky top-0 z-4 bg-slate-200 dark:bg-accent dark:hover:bg-card hover:bg-accent p-4 rounded-md shadow-lg "
+                        : "z-1 bg-background dark:bg-accent dark:hover:bg-card hover:bg-accent p-4 rounded-md"
+                    }
                   >
                     <div className="w-full flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-[60px] h-[60px]">
+                        <div className="relative w-[60px] h-[60px] overflow-hidden">
                           <Image
                             src={getImageSrc(el.imageUrl)}
-                            alt={el.name}
-                            width={100}
-                            height={100}
+                            alt={el.name || "Item Image"}
+                            fill
+                            sizes="60px"
                             className="w-auto h-auto object-cover"
                           />
                         </div>
                         <p>{el.name}</p>
                       </div>
                       <div>
-                        <Button>Pick</Button>
+                        <Button
+                          className={
+                            el.id === pickedItem ? "bg-destructive" : ""
+                          }
+                          onClick={() => handlePickItemClick(el.id as string)}
+                        >
+                          {el.id === pickedItem ? <CheckCircle /> : "Pick"}
+                        </Button>
                       </div>
                     </div>
                   </li>
