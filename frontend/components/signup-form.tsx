@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useCallback, memo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,7 +18,8 @@ import { Input } from "@/components/ui/input";
 import { GoogleSignIn, signUp, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
-export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+// OPTIMIZATION: Added memo to prevent unnecessary re-renders
+export const SignupForm = memo(function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -26,7 +27,8 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     if (session) router.push("/");
   }, [session, router]);
 
-  const handleSignupSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // OPTIMIZATION: Wrapped in useCallback to prevent recreation on every render
+  const handleSignupSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
@@ -39,7 +41,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     } catch (error) {
       console.error("Signup failed:", error);
     }
-  };
+  }, [router]);
   return (
     <Card className="bg-card" {...props}>
       <CardHeader>
@@ -103,4 +105,4 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       </CardContent>
     </Card>
   );
-}
+});

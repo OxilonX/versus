@@ -18,14 +18,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { GoogleSignIn, signIn } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useCallback, memo } from "react";
 
-export function LoginForm({
+// OPTIMIZATION: Added memo to prevent unnecessary re-renders
+export const LoginForm = memo(function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
 
-  const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // OPTIMIZATION: Wrapped in useCallback to prevent recreation on every render
+  const handleLoginSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
@@ -37,7 +40,7 @@ export function LoginForm({
     } catch (error) {
       console.error("Login failed:", error);
     }
-  };
+  }, [router]);
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -91,4 +94,4 @@ export function LoginForm({
       </Card>
     </div>
   );
-}
+});

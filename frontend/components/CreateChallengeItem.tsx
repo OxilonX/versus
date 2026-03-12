@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 //local comps imports
 //icons imports
 import { CheckCircle, Plus, Search } from "lucide-react";
@@ -19,6 +19,7 @@ import Link from "next/link";
 
 const DEFAULT_IMAGE = "/images/default_item_v1.jpeg";
 
+// OPTIMIZATION: Moved outside component to prevent recreation on every render
 const isValidImageSrc = (url: string): boolean => {
   if (!url) return false;
 
@@ -53,6 +54,58 @@ const isValidImageSrc = (url: string): boolean => {
   return hasValidExtension || hasValidSubdomain;
 };
 
+// OPTIMIZATION: Moved outside component to prevent recreation on every render
+const imagesBrands = [
+  {
+    svg: (
+      <svg
+        style={{ width: 12 }}
+        role="img"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <title>Pixabay</title>
+        <path d="M2 0a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm10.193 5.5h2.499l1.967 2.872L18.854 5.5h2.482l-3.579 4.592 3.91 4.813h-2.638l-2.395-3.064-2.15 3.064h-2.579l3.579-4.813zm-5.045.004c1.32.033 2.42.49 3.3 1.371.879.881 1.335 1.986 1.37 3.317-.035 1.331-.491 2.441-1.37 3.328-.88.887-1.98 1.346-3.3 1.38H4.346v3.768H2.5v-8.476c.032-1.33.486-2.436 1.359-3.317.873-.88 1.97-1.338 3.29-1.37Zm0 1.864c-.797.02-1.46.294-1.985.823-.525.53-.797 1.196-.817 2v2.847h2.802c.808-.019 1.476-.294 2.003-.826.528-.532.8-1.206.82-2.02-.02-.805-.292-1.47-.82-2-.527-.53-1.195-.805-2.003-.824Z" />
+      </svg>
+    ),
+    name: "pixabay",
+    link: "https://pixabay.com",
+    color: "#191B26",
+  },
+  {
+    svg: (
+      <svg
+        style={{ width: 12 }}
+        role="img"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <title>Pexels</title>
+        <path d="M1.5 0A1.5 1.5 0 000 1.5v21A1.5 1.5 0 001.5 24h21a1.5 1.5 0 001.5-1.5v-21A1.5 1.5 0 0022.5 0h-21zm6.75 6.75h5.2715a3.843 3.843 0 01.627 7.6348V17.25H8.25V6.75zm1.5 1.5v7.5h2.8984v-2.8145h.873a2.343 2.343 0 100-4.6855H9.75Z" />
+      </svg>
+    ),
+    name: "pexels",
+    link: "https://pexels.com",
+    color: "#05A081",
+  },
+  {
+    svg: (
+      <svg
+        style={{ width: 12 }}
+        role="img"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <title>Unsplash</title>
+        <path d="M7.5 6.75V0h9v6.75h-9zm9 3.75H24V24H0V10.5h7.5v6.75h9V10.5z" />
+      </svg>
+    ),
+    name: "unsplash",
+    link: "https://unsplash.com",
+    color: "#000000",
+  },
+];
+
 interface Item {
   id: string;
   name: string;
@@ -60,59 +113,11 @@ interface Item {
   isPublic: boolean;
   userId: string;
 }
-const CreateChallengeItem = ({ setId }) => {
-  const imagesBrands = [
-    {
-      svg: (
-        <svg
-          style={{ width: 12 }}
-          role="img"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <title>Pixabay</title>
-          <path d="M2 0a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm10.193 5.5h2.499l1.967 2.872L18.854 5.5h2.482l-3.579 4.592 3.91 4.813h-2.638l-2.395-3.064-2.15 3.064h-2.579l3.579-4.813zm-5.045.004c1.32.033 2.42.49 3.3 1.371.879.881 1.335 1.986 1.37 3.317-.035 1.331-.491 2.441-1.37 3.328-.88.887-1.98 1.346-3.3 1.38H4.346v3.768H2.5v-8.476c.032-1.33.486-2.436 1.359-3.317.873-.88 1.97-1.338 3.29-1.37Zm0 1.864c-.797.02-1.46.294-1.985.823-.525.53-.797 1.196-.817 2v2.847h2.802c.808-.019 1.476-.294 2.003-.826.528-.532.8-1.206.82-2.02-.02-.805-.292-1.47-.82-2-.527-.53-1.195-.805-2.003-.824Z" />
-        </svg>
-      ),
-      name: "pixabay",
-      link: "https://pixabay.com",
-      color: "#191B26",
-    },
-    {
-      svg: (
-        <svg
-          style={{ width: 12 }}
-          role="img"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <title>Pexels</title>
-          <path d="M1.5 0A1.5 1.5 0 000 1.5v21A1.5 1.5 0 001.5 24h21a1.5 1.5 0 001.5-1.5v-21A1.5 1.5 0 0022.5 0h-21zm6.75 6.75h5.2715a3.843 3.843 0 01.627 7.6348V17.25H8.25V6.75zm1.5 1.5v7.5h2.8984v-2.8145h.873a2.343 2.343 0 100-4.6855H9.75Z" />
-        </svg>
-      ),
-      name: "pexels",
-      link: "https://pexels.com",
-      color: "#05A081",
-    },
-    {
-      svg: (
-        <svg
-          style={{ width: 12 }}
-          role="img"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <title>Unsplash</title>
-          <path d="M7.5 6.75V0h9v6.75h-9zm9 3.75H24V24H0V10.5h7.5v6.75h9V10.5z" />
-        </svg>
-      ),
-      name: "unsplash",
-      link: "https://unsplash.com",
-      color: "#000000",
-    },
-  ];
+
+// OPTIMIZATION: Added memo to prevent re-renders when parent state changes (e.g., typing in CreateChallengeForm)
+const CreateChallengeItem = memo(({ setId }: { setId: (id: string) => void }) => {
   const [items, setItems] = useState<Item[]>([]);
-  const [fullDate, setFullDate] = useState<string>(new Date().toISOString());
+  const [fullDate] = useState<string>(new Date().toISOString());
   const [formData, setFormData] = useState({
     name: "",
     imageUrl: "",
@@ -121,7 +126,9 @@ const CreateChallengeItem = ({ setId }) => {
   const [searchQuerry, setSearchQuerry] = useState("");
   const [hasError, setHasError] = useState(false);
   const [pickedItem, setPickedItem] = useState("");
-  const getPublicItems = async () => {
+
+  // OPTIMIZATION: Wrapped in useCallback to prevent recreation on every render
+  const getPublicItems = useCallback(async () => {
     try {
       const response = await fetch("/api/items", {
         credentials: "include",
@@ -136,8 +143,10 @@ const CreateChallengeItem = ({ setId }) => {
         position: "bottom-right",
       });
     }
-  };
-  const getPrivateItems = async () => {
+  }, []);
+
+  // OPTIMIZATION: Wrapped in useCallback to prevent recreation on every render
+  const getPrivateItems = useCallback(async () => {
     try {
       const response = await fetch("/api/items/private", {
         credentials: "include",
@@ -155,7 +164,7 @@ const CreateChallengeItem = ({ setId }) => {
         position: "bottom-right",
       });
     }
-  };
+  }, []);
   useEffect(() => {
     const fetchItems = async () => {
       const privateData = await getPrivateItems();
@@ -169,10 +178,12 @@ const CreateChallengeItem = ({ setId }) => {
     };
 
     fetchItems();
-  }, []);
-  const handlePickItemClick = (id: string) => {
+  }, [getPrivateItems, getPublicItems]);
+
+  // OPTIMIZATION: Wrapped in useCallback to prevent recreation on every render
+  const handlePickItemClick = useCallback((id: string) => {
     setPickedItem(id);
-    setId(pickedItem);
+    setId(id);
     setItems((prevItems) => {
       const itemToMove = prevItems.find((item) => item.id === id);
       if (!itemToMove) return prevItems;
@@ -180,8 +191,10 @@ const CreateChallengeItem = ({ setId }) => {
       const remainingItems = prevItems.filter((item) => item.id !== id);
       return [itemToMove, ...remainingItems];
     });
-  };
-  const getImageSrc = (url: string | null | undefined): string => {
+  }, [setId]);
+
+  // OPTIMIZATION: Wrapped in useCallback to prevent recreation on every render
+  const getImageSrc = useCallback((url: string | null | undefined): string => {
     if (!url || typeof url !== "string" || url.trim() === "") {
       return DEFAULT_IMAGE;
     }
@@ -195,8 +208,10 @@ const CreateChallengeItem = ({ setId }) => {
     }
 
     return url;
-  };
-  const handleAddItem = async () => {
+  }, [hasError]);
+
+  // OPTIMIZATION: Wrapped in useCallback to prevent recreation on every render
+  const handleAddItem = useCallback(async () => {
     if (!formData?.name.trim()) {
       return toast.warning("Item name is required", {
         position: "bottom-right",
@@ -225,7 +240,7 @@ const CreateChallengeItem = ({ setId }) => {
       success: (data) => `${data.name} has been created successfully!`,
       error: (err) => `Error: ${err.message}`,
     });
-  };
+  }, [formData]);
   return (
     <div className="flex flex-col justify-center items-center ">
       <Tabs defaultValue="search" className="w-full">
@@ -464,6 +479,8 @@ const CreateChallengeItem = ({ setId }) => {
       </Tabs>
     </div>
   );
-};
+});
+
+CreateChallengeItem.displayName = "CreateChallengeItem";
 
 export default CreateChallengeItem;

@@ -14,7 +14,10 @@ const CreateChallengeForm = () => {
   const [secondnItemId, setSecondItemId] = useState<string>("");
   const setFirst = useCallback((id: string) => setFirstItemId(id), []);
   const setSecond = useCallback((id: string) => setSecondItemId(id), []);
-  const initChallengeHandleClick = async () => {
+
+  // OPTIMIZATION: Wrapped in useCallback to prevent recreation on every render
+  // This prevents child components from re-rendering when parent re-renders
+  const initChallengeHandleClick = useCallback(async () => {
     if (!challengeInput.trim()) return "no name";
     if (!(firstItemId || secondnItemId)) return "missing item id problem";
     const bodyData = {
@@ -36,7 +39,7 @@ const CreateChallengeForm = () => {
     } catch (err) {
       console.log(err);
     }
-  };
+  }, [challengeInput, firstItemId, secondnItemId]);
   return (
     <div className="py-15">
       <div className="pb-4">
