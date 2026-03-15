@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CreateChallengeItem from "./CreateChallengeItem";
 import { useState, useCallback, memo } from "react";
+import { toast } from "sonner";
 //local comps imports
 const CreateChallengeForm = () => {
   const [challengeInput, setChallengeInput] = useState("");
@@ -15,30 +16,48 @@ const CreateChallengeForm = () => {
   const setFirst = useCallback((id: string) => setFirstItemId(id), []);
   const setSecond = useCallback((id: string) => setSecondItemId(id), []);
 
-  // OPTIMIZATION: Wrapped in useCallback to prevent recreation on every render
-  // This prevents child components from re-rendering when parent re-renders
   const initChallengeHandleClick = useCallback(async () => {
-    if (!challengeInput.trim()) return "no name";
-    if (!(firstItemId || secondnItemId)) return "missing item id problem";
-    const bodyData = {
-      title: challengeInput,
-      items: [{ itemId: firstItemId }, { itemId: secondnItemId }],
-    };
-    try {
+    if (!challengeInput.trim()) {
+      return toast.warning("Name required", {
+        description: "Please fill the challenge name form, then try again.",
+        position: "bottom-right",
+        id: "val-challenge-name",
+        closeButton: false,
+      });
+    }
+
+    if (!(firstItemId && secondnItemId)) {
+      return toast.warning("Selection missing", {
+        description: "Please select two items, then try again.",
+        position: "bottom-right",
+        id: "val-item",
+        closeButton: false,
+      });
+    }
+    const createChallengeAction = async () => {
+      const bodyData = {
+        title: challengeInput,
+        items: [{ itemId: firstItemId }, { itemId: secondnItemId }],
+      };
       const response = await fetch("/api/challenges/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(bodyData),
       });
       const data = await response.json();
-      if (!response.ok) return "error server";
-      console.log(data);
-    } catch (err) {
-      console.log(err);
-    }
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create challenge");
+      }
+      return data;
+    };
+
+    toast.promise(createChallengeAction(), {
+      closeButton: false,
+      loading: "Initializing battle arena...",
+      success: (data) => `${data.title} is live! Ready for battle?`,
+      error: (err) => err.message,
+    });
   }, [challengeInput, firstItemId, secondnItemId]);
   return (
     <div className="py-15">

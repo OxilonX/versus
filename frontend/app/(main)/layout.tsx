@@ -21,17 +21,19 @@ export default function RootLayout({
           {children}
         </main>
         <Toaster
-          theme="dark"
           richColors
-          closeButton
           toastOptions={{
             style: {
-              background: "var(--card)",
-              color: "var(--foreground)",
-              border: "1px solid var(--border)",
+              color: "var(--primary-foreground)",
+              border: "none",
             },
-            className: "font-sans border-2",
+            classNames: {
+              toast: "!bg-primary dark:!bg-accent",
+              closeButton:
+                "!bg-red-300 dark:!bg-red-500 !bg text-foreground transition-colors z-50",
+            },
           }}
+          duration={2000}
         />
         <Footer />
       </ThemeProvider>

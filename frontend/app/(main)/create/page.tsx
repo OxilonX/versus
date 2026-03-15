@@ -15,6 +15,12 @@ export default function CreatePage() {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (mounted && !isPending && !session) {
+      router.push("/login");
+    }
+  }, [mounted, isPending, session, router]);
+
   if (!mounted || isPending) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -27,9 +33,6 @@ export default function CreatePage() {
   }
 
   if (!session) {
-    if (typeof window !== "undefined") {
-      router.push("/login");
-    }
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-pulse flex items-center gap-4">

@@ -101,14 +101,12 @@ model Challenge {
 }
 
 model Item {
-  id       String  @id @default(cuid())
-  name     String
-  imageUrl String? @default("image.example.com")
-  isPublic Boolean @default(true)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
+  id         String          @id @default(cuid())
+  name       String
+  imageUrl   String?         @default("image.example.com")
+  isPublic   Boolean         @default(true)
+  userId     String
+  user       User            @relation(fields: [userId], references: [id])
   challenges ChallengeItem[]
   votes      Vote[]
 
@@ -125,13 +123,11 @@ model ChallengeItem {
 }
 
 model Like {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  userId      String
   challengeId String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, challengeId])
@@ -139,17 +135,14 @@ model Like {
 }
 
 model Vote {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  userId      String
   challengeId String
+  itemId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-
-  itemId String
-  item   Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  item        Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
   @@unique([userId, challengeId])
   @@map("votes")
