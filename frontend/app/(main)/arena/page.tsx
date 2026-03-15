@@ -9,7 +9,7 @@ import { SearchIcon, RotateCcw } from "lucide-react";
 import ArenaChallengeCard from "@/components/ArenaChallengeCard";
 const ArenaPage = () => {
   return (
-    <div className="py-15">
+    <div className="py-10">
       <div className="pb-4">
         <h1 className="hd-font text-3xl font-black uppercase ">
           Watch Your Challenges

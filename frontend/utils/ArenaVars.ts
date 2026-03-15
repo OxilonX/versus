@@ -1,26 +1,26 @@
 const challenges = [
   {
     id: "1",
-    title: "GOAT of Football",
-    userId: "user_100",
-    createdAt: "2026-03-15T08:00:00.000Z",
+    title: "",
+    userId: "",
+    createdAt: "",
     items: [
       {
         itemId: "1",
         item: {
-          id: "1",
-          name: "Lionel Messi",
+          id: "",
+          name: "",
           imageUrl:
-            "https://images.pexels.com/photos/36540591/pexels-photo-36540591.jpeg",
+            "",
         },
       },
       {
         itemId: "2",
         item: {
           id: "2",
-          name: "Cristiano Ronaldo",
+          name: "",
           imageUrl:
-            "https://images.pexels.com/photos/36203331/pexels-photo-36203331.jpeg",
+            "",
         },
       },
     ],

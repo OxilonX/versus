@@ -1,3 +1,4 @@
+"use client";
 //local vars imports
 import { challenges } from "@/utils/ArenaVars";
 //shadcn imports
@@ -20,11 +21,49 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 //lucide icons imports
 import { Ellipsis, TriangleAlert, Heart, Share, Bookmark } from "lucide-react";
-
+import { useEffect, useState } from "react";
+const fetchChallenges = async () => {
+  try {
+    const response = await fetch("/api/challenges");
+    const data = response.json();
+    if (!data) return "aw";
+    return data;
+  } catch (err) {
+    console.log(err);
+  }
+};
 const ArenaChallengeCard = () => {
+  const [challenges, setChallenges] = useState([
+    {
+      id: "1",
+      title: "",
+      userId: "",
+      createdAt: "",
+      items: [
+        {
+          itemId: "1",
+          item: {
+            id: "",
+            name: "",
+            imageUrl: null,
+          },
+        },
+        {
+          itemId: "2",
+          item: {
+            id: "2",
+            name: "",
+            imageUrl: null,
+          },
+        },
+      ],
+    },
+  ]);
+  useEffect(() => {
+    setChallenges(challenges);
+  }, []);
   return (
     <div>
-      {" "}
       <div>
         <ul className="w-full flex flex-col gap-8">
           {challenges.map((c) => (
