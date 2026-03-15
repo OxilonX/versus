@@ -23,7 +23,7 @@ import { useEffect, useState } from "react";
 const fetchChallenges = async () => {
   try {
     const response = await fetch("/api/challenges");
-    const data = response.json();
+    const data = await response.json();
     if (!data) return "aw";
     return data;
   } catch (err) {
@@ -105,75 +105,72 @@ const ArenaChallengeCard = () => {
                 </DropdownMenu>
               </div>
 
-              <div className="relative py-2 grid grid-cols-2 gap-1 w-full ">
+              <div className="relative grid-rows-[300px] py-2 grid grid-cols-2 gap-1 w-full overflow-hidden transition-opacity duration-500">
                 <Card
                   key={c.items[0].itemId}
-                  className="relative z-5  w-full pt-0"
+                  className="relative z-5  w-full pt-0 group cursor-pointer "
                 >
                   <div className="absolute inset-0 z-30 aspect-video dark:bg-black/10" />
                   {c.items[0].item.imageUrl ? (
-                    <Image
-                      src={
-                        c.items[0].item.imageUrl ||
-                        "/images/default_item_v1.jpeg"
-                      }
-                      alt="Event cover"
-                      width={100}
-                      height={100}
-                      sizes="100px"
-                      className="relative z-20 aspect-video w-full object-cover brightness-100  dark:brightness-80"
-                    />
+                    <div className="w-full h-full">
+                      <Image
+                        src={
+                          c.items[0].item.imageUrl ||
+                          "/images/default_item_v1.jpeg"
+                        }
+                        alt="Event cover"
+                        fill
+                        sizes="100px"
+                        className="relative z-20 w-full object-cover brightness-100  
+                        dark:brightness-80 transition-all duration-500 group-hover:brightness-60 "
+                      />
+                    </div>
                   ) : null}
                   <div className="absolute z-100 w-full h-[80%] flex items-center justify-center italic font-black text-primary text-[8rem]">
                     <p>50%</p>
                   </div>
-                  <CardHeader>
-                    <CardTitle>{c.items[0].item.name}</CardTitle>
-                    <CardDescription className="text-xs font-medium">
+                  <div className="opacity-0 group-hover:opacity-100 absolute bottom-5 left-5 z-100  transition-opacity duration-500 ">
+                    <h1 className="text-3xl font-bold capitalize text-white">
+                      {c.items[0].item.name}
+                    </h1>
+                    <p className="text-sm font-medium text-muted ">
                       Created at : {new Date(c.createdAt).toLocaleDateString()}
-                    </CardDescription>
-                  </CardHeader>
+                    </p>
+                  </div>
                 </Card>
-                <div
-                  className="absolute w-full h-full z-20  flex items-center justify-center  
-              "
-                >
-                  <Image
-                    src="/images/vs_image.png"
-                    alt="vs image"
-                    width={50}
-                    height={50}
-                    sizes="100px"
-                    className="grayscale drop-shadow-2xl drop-shadow-black/30"
-                  />
-                </div>
+
                 <Card
                   key={c.items[1].itemId}
-                  className="relative ml-auto z-5 w-full pt-0"
+                  className="relative ml-auto z-5 w-full pt-0 group
+                   cursor-pointer"
                 >
                   <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
                   {c.items[1].item.imageUrl ? (
-                    <Image
-                      src={
-                        c.items[1].item.imageUrl ||
-                        "/images/default_item_v1.jpeg"
-                      }
-                      alt="Event cover"
-                      width={100}
-                      height={100}
-                      sizes="100px"
-                      className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale dark:brightness-40"
-                    />
+                    <div className="w-full h-full">
+                      <Image
+                        src={
+                          c.items[1].item.imageUrl ||
+                          "/images/default_item_v1.jpeg"
+                        }
+                        alt="Event cover"
+                        fill
+                        sizes="100px"
+                        className="relative z-20 w-full object-cover brightness-100  
+                        dark:brightness-80 transition-all duration-500 group-hover:brightness-60 "
+                      />
+                    </div>
                   ) : null}
                   <div className="absolute z-100 w-full h-[80%] flex items-center justify-center italic font-black text-primary text-[8rem]">
                     <p>30%</p>
                   </div>
-                  <CardHeader className="">
-                    <CardTitle>{c.items[1].item.name}</CardTitle>
-                    <CardDescription className="text-xs font-medium">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500  absolute bottom-5 left-5 z-100">
+                    <h1 className="text-3xl font-bold capitalize text-white">
+                      {c.items[1].item.name}
+                    </h1>
+                    <p className="text-sm font-medium text-muted ">
                       Created at : {new Date(c.createdAt).toLocaleDateString()}
-                    </CardDescription>
-                  </CardHeader>
+                    </p>
+                  </div>
                 </Card>
               </div>
               <div className="">
