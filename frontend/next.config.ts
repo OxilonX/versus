@@ -32,6 +32,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "pixabay.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "example.com",
         pathname: "/**",
       },

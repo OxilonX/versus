@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-
+//local comps imports
+import LoadingScreen from "./LoadingScreen";
 export default function NavAvatar() {
   const router = useRouter();
   const session = useSession();
@@ -19,6 +20,10 @@ export default function NavAvatar() {
     await signOut();
     router.refresh();
   };
+  if (session.isPending) {
+    return <LoadingScreen />;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

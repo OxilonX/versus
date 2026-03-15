@@ -41,7 +41,32 @@ export const createChallenge = async (req: Request, res: Response) => {
 
 export const getChallenges = async (req: Request, res: Response) => {
   try {
-    const challenges = await prisma.challenge.findMany();
+    const challenges = await prisma.challenge.findMany({
+      select: {
+        id: true,
+        title: true,
+        userId: true,
+        createdAt: true,
+        user: {
+          select: {
+            image: true,
+            name: true,
+          },
+        },
+        items: {
+          select: {
+            itemId: true,
+            item: {
+              select: {
+                id: true,
+                name: true,
+                imageUrl: true,
+              },
+            },
+          },
+        },
+      },
+    });
     res.json(challenges);
   } catch (error) {
     console.error("Error fetching posts:", error);

@@ -20,27 +20,28 @@ import { GoogleSignIn, signIn } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useCallback, memo } from "react";
 
-// OPTIMIZATION: Added memo to prevent unnecessary re-renders
 export const LoginForm = memo(function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
 
-  // OPTIMIZATION: Wrapped in useCallback to prevent recreation on every render
-  const handleLoginSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+  const handleLoginSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
 
-    try {
-      await signIn(email, password);
-      router.push("/");
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
-  }, [router]);
+      try {
+        await signIn(email, password);
+        router.push("/");
+      } catch (error) {
+        console.error("Login failed:", error);
+      }
+    },
+    [router],
+  );
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>

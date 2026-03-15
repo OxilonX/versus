@@ -1,6 +1,4 @@
 "use client";
-//local vars imports
-import { challenges } from "@/utils/ArenaVars";
 //shadcn imports
 import {
   Card,
@@ -38,6 +36,10 @@ const ArenaChallengeCard = () => {
       id: "1",
       title: "",
       userId: "",
+      user: {
+        image: "",
+        name: "usernsme",
+      },
       createdAt: "",
       items: [
         {
@@ -60,7 +62,14 @@ const ArenaChallengeCard = () => {
     },
   ]);
   useEffect(() => {
-    setChallenges(challenges);
+    const loadChallenges = async () => {
+      const data = await fetchChallenges();
+      if (data) {
+        console.log(data);
+        setChallenges(data);
+      }
+    };
+    loadChallenges();
   }, []);
   return (
     <div>
@@ -72,7 +81,7 @@ const ArenaChallengeCard = () => {
                 <div className="flex items-center gap-2">
                   <Avatar>
                     <AvatarImage
-                      src="https://github.com/shadcn.png"
+                      src={c?.user?.image || "https://github.com/shadcn.png"}
                       alt="@shadcn"
                     />
                     <AvatarFallback>CN</AvatarFallback>
@@ -102,21 +111,26 @@ const ArenaChallengeCard = () => {
                   className="relative z-5  w-full pt-0"
                 >
                   <div className="absolute inset-0 z-30 aspect-video dark:bg-black/10" />
-                  <Image
-                    src={c.items[0].item.imageUrl}
-                    alt="Event cover"
-                    width={100}
-                    height={100}
-                    sizes="100px"
-                    className="relative z-20 aspect-video w-full object-cover brightness-100  dark:brightness-80"
-                  />
+                  {c.items[0].item.imageUrl ? (
+                    <Image
+                      src={
+                        c.items[0].item.imageUrl ||
+                        "/images/default_item_v1.jpeg"
+                      }
+                      alt="Event cover"
+                      width={100}
+                      height={100}
+                      sizes="100px"
+                      className="relative z-20 aspect-video w-full object-cover brightness-100  dark:brightness-80"
+                    />
+                  ) : null}
                   <div className="absolute z-100 w-full h-[80%] flex items-center justify-center italic font-black text-primary text-[8rem]">
                     <p>50%</p>
                   </div>
                   <CardHeader>
                     <CardTitle>{c.items[0].item.name}</CardTitle>
                     <CardDescription className="text-xs font-medium">
-                      Created on : {c.createdAt}
+                      Created at : {new Date(c.createdAt).toLocaleDateString()}
                     </CardDescription>
                   </CardHeader>
                 </Card>
@@ -138,21 +152,26 @@ const ArenaChallengeCard = () => {
                   className="relative ml-auto z-5 w-full pt-0"
                 >
                   <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
-                  <Image
-                    src={c.items[1].item.imageUrl}
-                    alt="Event cover"
-                    width={100}
-                    height={100}
-                    sizes="100px"
-                    className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale dark:brightness-40"
-                  />
+                  {c.items[1].item.imageUrl ? (
+                    <Image
+                      src={
+                        c.items[1].item.imageUrl ||
+                        "/images/default_item_v1.jpeg"
+                      }
+                      alt="Event cover"
+                      width={100}
+                      height={100}
+                      sizes="100px"
+                      className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale dark:brightness-40"
+                    />
+                  ) : null}
                   <div className="absolute z-100 w-full h-[80%] flex items-center justify-center italic font-black text-primary text-[8rem]">
                     <p>30%</p>
                   </div>
                   <CardHeader className="">
                     <CardTitle>{c.items[1].item.name}</CardTitle>
                     <CardDescription className="text-xs font-medium">
-                      Created on : {c.createdAt}
+                      Created at : {new Date(c.createdAt).toLocaleDateString()}
                     </CardDescription>
                   </CardHeader>
                 </Card>
@@ -169,7 +188,9 @@ const ArenaChallengeCard = () => {
                   20 likes
                 </div>
                 <div className="flex items-center gap-2 ">
-                  <p className="text-foreground font-bold text-sm">User Name</p>
+                  <p className="text-foreground font-bold text-sm">
+                    {c.user.name || "user name"}
+                  </p>
                   <p className="text-foreground/80 font-medium text-sm">
                     {c.title}
                   </p>
