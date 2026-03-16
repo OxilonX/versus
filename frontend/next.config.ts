@@ -17,6 +17,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "**.stocksnap.io",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "**.pexels.com",
         pathname: "/**",
       },

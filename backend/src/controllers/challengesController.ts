@@ -1,5 +1,9 @@
 import { prisma } from "../lib/prisma.js";
 import type { Request, Response } from "express";
+
+const isValidCuid = (str: string): boolean => {
+  return /^c[a-z0-9]{24}$/.test(str);
+};
 export const createChallenge = async (req: Request, res: Response) => {
   try {
     const { title, items } = req.body;
@@ -43,14 +47,31 @@ export const getChallenges = async (req: Request, res: Response) => {
     const currentUserId = req.user?.id;
     const { sort, search } = req.query;
 
-    const whereClause = search
-      ? {
-          OR: [
-            { title: { contains: search as string, mode: "insensitive" as const } },
-            { user: { name: { contains: search as string, mode: "insensitive" as const } } },
-          ],
-        }
-      : {};
+    const isCuid = isValidCuid(search as string);
+    console.log("Search Query:", search, "Is CUID match:", isCuid);
+
+    const whereClause = isCuid
+      ? { id: search as string }
+      : search
+        ? {
+            OR: [
+              {
+                title: {
+                  contains: search as string,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                user: {
+                  name: {
+                    contains: search as string,
+                    mode: "insensitive" as const,
+                  },
+                },
+              },
+            ],
+          }
+        : {};
 
     let orderBy: any = { createdAt: "desc" };
     if (sort === "votes") {
@@ -142,18 +163,79 @@ export const getChallenges = async (req: Request, res: Response) => {
 
 export const getChallengeById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const currentUserId = req.user?.id;
+    const { challengeId } = req.params;
 
-    const challenges = await prisma.challenge.findUnique({
-      where: { id: id as string },
+    const challenge = await prisma.challenge.findUnique({
+      where: { id: challengeId as string },
+
+      select: {
+        id: true,
+        title: true,
+        userId: true,
+        createdAt: true,
+        user: {
+          select: {
+            image: true,
+            name: true,
+          },
+        },
+        items: {
+          orderBy: {
+            itemId: "asc",
+          },
+          select: {
+            itemId: true,
+            item: {
+              select: {
+                id: true,
+                name: true,
+                imageUrl: true,
+              },
+            },
+            _count: {
+              select: {
+                votes: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            like: true,
+          },
+        },
+        like: {
+          where: { userId: currentUserId },
+          select: { userId: true },
+        },
+        votes: {
+          where: { userId: currentUserId },
+          select: { itemId: true },
+        },
+      },
     });
-
-    if (!challenges) {
-      res.status(404).json({ error: "Challenge not found" });
-      return;
+    if (!challenge) {
+      return res.status(404).json({ error: "Challenge not found" });
     }
+    const item1Votes = challenge.items[0]?._count.votes || 0;
+    const item2Votes = challenge.items[1]?._count.votes || 0;
+    const totalVotes = item1Votes + item2Votes;
+    const results = {
+      ...challenge,
+      isLiked: challenge.like.length > 0,
+      likesCount: challenge._count.like,
+      userVotedItemId: challenge.votes[0]?.itemId || null,
+      stats: {
+        item1Percent:
+          totalVotes > 0 ? Math.round((item1Votes / totalVotes) * 100) : 0,
+        item2Percent:
+          totalVotes > 0 ? Math.round((item2Votes / totalVotes) * 100) : 0,
+        totalVotes,
+      },
+    };
 
-    res.json(challenges);
+    res.json([results]);
   } catch (error) {
     console.error("Error fetching Challenges:", error);
     res.status(500).json({ error: "Failed to fetch Challenges" });

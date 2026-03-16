@@ -9,11 +9,31 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogClose,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogContent,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 //next imports
 import Image from "next/image";
 //lucide icons imports
-import { Ellipsis, TriangleAlert, Heart, Share, Bookmark } from "lucide-react";
+import {
+  Ellipsis,
+  TriangleAlert,
+  Heart,
+  Share,
+  Bookmark,
+  Copy,
+  Check,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Spinner } from "./ui/spinner";
 import { toast } from "sonner";
@@ -100,6 +120,14 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
   const [votingChallengeId, setVotingChallengeId] = useState<string | null>(
     null,
   );
+  const [copied, setCopied] = useState(false);
+  const handleCopy = (challengeId: string) => {
+    const shareUrl = `${window.location.origin}/arena/${challengeId}`;
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    toast.success("Link copied!");
+    setTimeout(() => setCopied(false), 2000);
+  };
   const handleLike = async (challengeId: string) => {
     const previousChallenges = [...challenges];
     setChallenges((prev) =>
@@ -338,7 +366,51 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                             : "stroke-2 cursor-pointer"
                         }
                       />
-                      <Share className="stroke-2 cursor-pointer" />
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Share className="stroke-2 cursor-pointer" />
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>Share challenge link</DialogTitle>
+                            <DialogDescription>
+                              Anyone who has this link will be able to view this
+                              challenge and interact with it if logged in.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="flex items-center space-x-2 pt-2">
+                            <div className="grid flex-1 gap-2">
+                              <Label htmlFor="link" className="sr-only">
+                                Link
+                              </Label>
+                              <Input
+                                id="link"
+                                className="h-9 bg-muted/50 font-mono text-xs"
+                                value={`${typeof window !== "undefined" ? window.location.origin : ""}/arena/${c.id}`}
+                                readOnly
+                              />
+                            </div>
+                            <Button
+                              type="submit"
+                              size="sm"
+                              className="px-3"
+                              onClick={() => handleCopy(c.id)}
+                            >
+                              <span className="sr-only">Copy</span>
+                              {copied ? (
+                                <Check className="size-4" />
+                              ) : (
+                                <Copy className="size-4" />
+                              )}
+                            </Button>
+                          </div>
+                          <DialogFooter className="sm:justify-start">
+                            <DialogClose asChild>
+                              <Button type="button">Close</Button>
+                            </DialogClose>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                     <Bookmark className="stroke-2 cursor-pointer" />
                   </div>
