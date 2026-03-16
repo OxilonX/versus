@@ -42,6 +42,11 @@ export const getChallenges = async (req: Request, res: Response) => {
   try {
     const currentUserId = req.user?.id;
     const challenges = await prisma.challenge.findMany({
+      take: 5,
+      skip: 0,
+      orderBy: {
+        createdAt: "desc",
+      },
       select: {
         id: true,
         title: true,
@@ -54,6 +59,9 @@ export const getChallenges = async (req: Request, res: Response) => {
           },
         },
         items: {
+          orderBy: {
+            itemId: "asc",
+          },
           select: {
             itemId: true,
             item: {
@@ -63,22 +71,45 @@ export const getChallenges = async (req: Request, res: Response) => {
                 imageUrl: true,
               },
             },
+            _count: {
+              select: {
+                votes: true,
+              },
+            },
           },
         },
         _count: {
-          select: { like: true },
+          select: {
+            like: true,
+          },
         },
         like: {
-          where: { userId: currentUserId || "guest" },
+          where: { userId: currentUserId },
           select: { userId: true },
+        },
+        votes: {
+          where: { userId: currentUserId },
+          select: { itemId: true },
         },
       },
     });
-    const results = challenges.map((challenge) => {
+    const results = challenges.map((c) => {
+      const item1Votes = c.items[0]?._count.votes || 0;
+      const item2Votes = c.items[1]?._count.votes || 0;
+      const totalVotes = item1Votes + item2Votes;
+
       return {
-        ...challenge,
-        isLiked: challenge.like.length > 0,
-        likesCount: challenge._count.like,
+        ...c,
+        isLiked: c.like.length > 0,
+        likesCount: c._count.like,
+        userVotedItemId: c.votes[0]?.itemId || null,
+        stats: {
+          item1Percent:
+            totalVotes > 0 ? Math.round((item1Votes / totalVotes) * 100) : 0,
+          item2Percent:
+            totalVotes > 0 ? Math.round((item2Votes / totalVotes) * 100) : 0,
+          totalVotes,
+        },
       };
     });
     res.json(results);
@@ -136,14 +167,12 @@ export const likeChallenge = async (req: Request, res: Response) => {
       });
       return res.json({ message: "Like removed", status: "unliked" });
     }
-
     await prisma.like.create({
       data: {
         userId: user.id,
         challengeId: challengeId,
       },
     });
-
     return res.status(201).json({ message: "Like added", status: "liked" });
   } catch (e) {
     return res.status(500).json({ error: "Internal Server Error" });

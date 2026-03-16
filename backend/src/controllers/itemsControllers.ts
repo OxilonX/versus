@@ -12,9 +12,10 @@ export const createItem = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Item name is required" });
     }
 
-    const finalImageUrl = !imageUrl || imageUrl.trim() === "" || !isValidUrl(imageUrl) 
-      ? "/images/default_item_v1.jpeg" 
-      : imageUrl;
+    const finalImageUrl =
+      !imageUrl || imageUrl.trim() === "" || !isValidUrl(imageUrl)
+        ? "/images/default_item_v1.jpeg"
+        : imageUrl;
 
     function isValidUrl(url: string): boolean {
       try {
@@ -64,5 +65,56 @@ export const getPrivateItems = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching items:", error);
     res.status(500).json({ error: "Failed to fetch items" });
+  }
+};
+export const voteItemChallenge = async (req: Request, res: Response) => {
+  try {
+    const { challengeId } = req.params as { challengeId: string };
+    const { itemId } = req.body;
+    const user = req.user;
+
+    if (!user?.id) return res.status(401).json({ error: "Unauthorized" });
+
+    const existingVote = await prisma.vote.findUnique({
+      where: {
+        userId_challengeId: {
+          userId: user.id,
+          challengeId,
+        },
+      },
+    });
+
+    if (existingVote && existingVote.itemId === itemId) {
+      await prisma.vote.delete({
+        where: { id: existingVote.id },
+      });
+      return res.json({ message: "Vote removed", status: "neutral" });
+    }
+
+    const vote = await prisma.vote.upsert({
+      where: {
+        userId_challengeId: {
+          userId: user.id,
+          challengeId,
+        },
+      },
+      update: { itemId, challengeItemChallengeId: challengeId, challengeItemItemId: itemId },
+      create: {
+        userId: user.id,
+        challengeId,
+        itemId,
+        challengeItemChallengeId: challengeId,
+        challengeItemItemId: itemId,
+      },
+    });
+
+    return res.status(201).json({
+      message: existingVote ? "Vote switched" : "Vote added",
+      status: "voted",
+      itemId: vote.itemId,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };

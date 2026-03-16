@@ -118,6 +118,7 @@ model ChallengeItem {
   itemId      String
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   item        Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  votes       Vote[]
 
   @@id([challengeId, itemId])
 }
@@ -135,14 +136,17 @@ model Like {
 }
 
 model Vote {
-  id          String    @id @default(cuid())
-  createdAt   DateTime  @default(now())
-  userId      String
-  challengeId String
-  itemId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  item        Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  id                       String         @id @default(cuid())
+  createdAt                DateTime       @default(now())
+  userId                   String
+  challengeId              String
+  itemId                   String
+  user                     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge                Challenge      @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  item                     Item           @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  challengeItem            ChallengeItem? @relation(fields: [challengeItemChallengeId, challengeItemItemId], references: [challengeId, itemId])
+  challengeItemChallengeId String?
+  challengeItemItemId      String?
 
   @@unique([userId, challengeId])
   @@map("votes")
