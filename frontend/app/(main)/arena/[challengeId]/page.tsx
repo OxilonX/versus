@@ -12,7 +12,7 @@ const ChallengeDetailsPage = async ({ params }: PageProps) => {
         <h1 className="hd-font text-3xl font-black uppercase ">
           Watch Your Challenges
         </h1>
-      </div>
+      </div>{" "}
       <ArenaChallengeCard sort={"newest"} search={challengeId} />
     </div>
   );

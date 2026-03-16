@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Lato, Bebas_Neue } from "next/font/google";
-
+import { Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeProvider";
 
@@ -18,7 +18,10 @@ const lato = Lato({
   subsets: ["latin"],
   variable: "--font-lato",
 });
-
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 export default function RootLayout({
   children,
 }: Readonly<{

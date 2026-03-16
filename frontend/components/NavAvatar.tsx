@@ -42,10 +42,12 @@ export default function NavAvatar() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-32">
-        <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          <DropdownMenuItem>Saves</DropdownMenuItem>
-        </DropdownMenuGroup>
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => router.push(`/profile/${session.data?.user?.id}`)}>
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem>Saves</DropdownMenuItem>
+          </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={handleSignOut} className="text-red-500">

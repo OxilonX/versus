@@ -9,7 +9,6 @@ import CreateChallengeItem from "./CreateChallengeItem";
 import { useState, useCallback, memo } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { router } from "better-auth/api";
 //local comps imports
 const CreateChallengeForm = () => {
   const [challengeInput, setChallengeInput] = useState("");

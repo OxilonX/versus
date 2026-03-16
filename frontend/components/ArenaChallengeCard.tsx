@@ -37,6 +37,7 @@ import {
 import { useEffect, useState } from "react";
 import { Spinner } from "./ui/spinner";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 //types
 interface Challenge {
   id: string;
@@ -237,7 +238,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
     };
     loadChallenges();
   }, [sort, search]);
-
+  const router = useRouter();
   return (
     <div>
       <div>
@@ -252,7 +253,12 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
               <li key={c.id}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Avatar>
+                    <Avatar
+                      className="cursor-pointer"
+                      onClick={() => {
+                        router.push(`/profile/${c.userId}`);
+                      }}
+                    >
                       <AvatarImage
                         src={c?.user?.image || "https://github.com/shadcn.png"}
                         alt="@shadcn"
