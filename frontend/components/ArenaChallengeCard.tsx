@@ -1,11 +1,6 @@
 "use client";
 //shadcn imports
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -21,16 +16,44 @@ import Image from "next/image";
 import { Ellipsis, TriangleAlert, Heart, Share, Bookmark } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Spinner } from "./ui/spinner";
+import { toast } from "sonner";
 const fetchChallenges = async () => {
   try {
-    const response = await fetch("/api/challenges");
+    const response = await fetch("/api/challenges", {
+      method: "GET",
+      credentials: "include",
+    });
+
     const data = await response.json();
-    if (!data) return "aw";
+    if (!data)
+      return toast.error(
+        "Failed to fetch chall`enges, refresh and try again.",
+        {
+          position: "bottom-right",
+        },
+      );
     return data;
   } catch (err) {
     console.log(err);
   }
 };
+const likeChallenge = async (challengeId: string) => {
+  try {
+    const response = await fetch(`/api/challenges/like/${challengeId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+    const data = await response.json();
+
+    return data;
+  } catch (err) {
+    return toast.warning("504 Internal Server Error.", {
+      position: "bottom-right",
+    });
+  }
+};
+
 const ArenaChallengeCard = () => {
   const [isFetchingChallenges, setIsFetchingChallenges] = useState(true);
   const [challenges, setChallenges] = useState([
@@ -38,6 +61,8 @@ const ArenaChallengeCard = () => {
       id: "1",
       title: "",
       userId: "",
+      likesCount: 0,
+      isLiked: false,
       user: {
         image: "",
         name: "usernsme",
@@ -63,6 +88,28 @@ const ArenaChallengeCard = () => {
       ],
     },
   ]);
+  const handleLike = async (challengeId: string) => {
+    const previousChallenges = [...challenges];
+    setChallenges((prev) =>
+      prev.map((c) => {
+        if (c.id === challengeId) {
+          return {
+            ...c,
+            isLiked: !c.isLiked,
+            likesCount: c.isLiked ? c.likesCount - 1 : c.likesCount + 1,
+          };
+        }
+        return c;
+      }),
+    );
+
+    const result = await likeChallenge(challengeId);
+
+    if (!result || result.error) {
+      setChallenges(previousChallenges);
+      toast.error("Action failed. Please try again.");
+    }
+  };
   useEffect(() => {
     const loadChallenges = async () => {
       const data = await fetchChallenges();
@@ -80,7 +127,7 @@ const ArenaChallengeCard = () => {
         <ul className="w-full flex flex-col gap-8">
           {isFetchingChallenges ? (
             <div className="bg-background flex items-center justify-center min-h-screen">
-              <Spinner />
+              <Spinner className="size-8" />
             </div>
           ) : (
             challenges.map((c) => (
@@ -94,7 +141,7 @@ const ArenaChallengeCard = () => {
                       />
                       <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
-                    <h1>{c.title}</h1>
+                    <h1>{c.user?.name}</h1>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -186,13 +233,20 @@ const ArenaChallengeCard = () => {
                 <div className="">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Heart className="stroke-2 cursor-pointer" />
+                      <Heart
+                        onClick={() => handleLike(c.id)}
+                        className={
+                          c.isLiked
+                            ? "stroke-0 fill-primary cursor-pointer"
+                            : "stroke-2 cursor-pointer"
+                        }
+                      />
                       <Share className="stroke-2 cursor-pointer" />
                     </div>
                     <Bookmark className="stroke-2 cursor-pointer" />
                   </div>
                   <div className="pt-1 flex items-center text-muted-foreground font-medium text-xs">
-                    20 likes
+                    {c.likesCount} likes
                   </div>
                   <div className="flex items-center gap-2 ">
                     <p className="text-foreground font-bold text-sm">

@@ -7,8 +7,8 @@ export const getUsers = async (req: Request, res: Response) => {
     const users = await prisma.user.findMany();
     res.json(users);
   } catch (error) {
-    console.error("Error fetching posts:", error);
-    res.status(500).json({ error: "Failed to fetch posts" });
+    console.error("Error fetching users :", error);
+    res.status(500).json({ error: "Failed to fetch users" });
   }
 };
 
@@ -21,13 +21,13 @@ export const getUsersById = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      res.status(404).json({ error: "Post not found" });
+      res.status(404).json({ error: "user not found" });
       return;
     }
 
     res.json(user);
   } catch (error) {
-    console.error("Error fetching post:", error);
-    res.status(500).json({ error: "Failed to fetch post" });
+    console.error("Error fetching User:", error);
+    res.status(500).json({ error: "Failed to fetch User" });
   }
 };

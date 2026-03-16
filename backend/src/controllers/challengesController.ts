@@ -1,4 +1,3 @@
-import { User } from "better-auth";
 import { prisma } from "../lib/prisma.js";
 import type { Request, Response } from "express";
 export const createChallenge = async (req: Request, res: Response) => {
@@ -41,6 +40,7 @@ export const createChallenge = async (req: Request, res: Response) => {
 
 export const getChallenges = async (req: Request, res: Response) => {
   try {
+    const currentUserId = req.user?.id;
     const challenges = await prisma.challenge.findMany({
       select: {
         id: true,
@@ -65,12 +65,26 @@ export const getChallenges = async (req: Request, res: Response) => {
             },
           },
         },
+        _count: {
+          select: { like: true },
+        },
+        like: {
+          where: { userId: currentUserId || "guest" },
+          select: { userId: true },
+        },
       },
     });
-    res.json(challenges);
+    const results = challenges.map((challenge) => {
+      return {
+        ...challenge,
+        isLiked: challenge.like.length > 0,
+        likesCount: challenge._count.like,
+      };
+    });
+    res.json(results);
   } catch (error) {
-    console.error("Error fetching posts:", error);
-    res.status(500).json({ error: "Failed to fetch posts" });
+    console.error("Error fetching Challenges:", error);
+    res.status(500).json({ error: "Failed to fetch Challenges" });
   }
 };
 
@@ -83,13 +97,55 @@ export const getChallengeById = async (req: Request, res: Response) => {
     });
 
     if (!challenges) {
-      res.status(404).json({ error: "Post not found" });
+      res.status(404).json({ error: "Challenge not found" });
       return;
     }
 
     res.json(challenges);
   } catch (error) {
-    console.error("Error fetching post:", error);
-    res.status(500).json({ error: "Failed to fetch post" });
+    console.error("Error fetching Challenges:", error);
+    res.status(500).json({ error: "Failed to fetch Challenges" });
+  }
+};
+export const likeChallenge = async (req: Request, res: Response) => {
+  try {
+    const { challengeId } = req.params as { challengeId: string };
+    const user = req.user;
+
+    if (!user?.id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const isLiked = await prisma.like.findUnique({
+      where: {
+        userId_challengeId: {
+          userId: user.id,
+          challengeId: challengeId,
+        },
+      },
+    });
+
+    if (isLiked) {
+      await prisma.like.delete({
+        where: {
+          userId_challengeId: {
+            userId: user.id,
+            challengeId: challengeId,
+          },
+        },
+      });
+      return res.json({ message: "Like removed", status: "unliked" });
+    }
+
+    await prisma.like.create({
+      data: {
+        userId: user.id,
+        challengeId: challengeId,
+      },
+    });
+
+    return res.status(201).json({ message: "Like added", status: "liked" });
+  } catch (e) {
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
