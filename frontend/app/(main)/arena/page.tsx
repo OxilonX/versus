@@ -1,13 +1,26 @@
-//shadcn imports
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
-import { Input } from "@/components/ui/input";
-//lucide icons imports
-import { SearchIcon, RotateCcw } from "lucide-react";
-//local comps imports
+import Link from "next/link";
+// local comps imports
 import ArenaChallengeCard from "@/components/ArenaChallengeCard";
-const ArenaPage = () => {
+import ArenaOptions from "@/components/ArenaOptions";
+
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+const ArenaPage = async ({ searchParams }: PageProps) => {
+  // Await the searchParams in Next.js 15+ Server Components
+  const params = await searchParams;
+
+  // Extract values or set defaults
+  const currentTab = (params.tab as string) || "newest";
+  const searchQuery = (params.search as string) || "";
+
+  const getTabLink = (tab: string) => {
+    const base = `?tab=${tab}`;
+    return searchQuery ? `${base}&search=${encodeURIComponent(searchQuery)}` : base;
+  };
+
   return (
     <div className="py-10">
       <div className="pb-4">
@@ -15,47 +28,41 @@ const ArenaPage = () => {
           Watch Your Challenges
         </h1>
       </div>
+
       <div className="flex items-center justify-between">
-        <Tabs defaultValue="newest" className="w-full">
+        {/* 'value' is driven by the URL, which handles the active styling automatically */}
+        <Tabs value={currentTab} className="w-full">
           <div className="flex items-center justify-between">
             <TabsList>
-              <TabsTrigger className="cursor-pointer" value="newest">
-                Newest
-              </TabsTrigger>
-              <TabsTrigger className="cursor-pointer" value="votes">
-                Most interactions
-              </TabsTrigger>
-              <TabsTrigger className="cursor-pointer" value="likes">
-                Most likes
-              </TabsTrigger>
+              <Link href={getTabLink("newest")} scroll={false} prefetch={true}>
+                <TabsTrigger className="cursor-pointer" value="newest">
+                  Newest
+                </TabsTrigger>
+              </Link>
+
+              <Link href={getTabLink("votes")} scroll={false} prefetch={true}>
+                <TabsTrigger className="cursor-pointer" value="votes">
+                  Most interactions
+                </TabsTrigger>
+              </Link>
+
+              <Link href={getTabLink("likes")} scroll={false} prefetch={true}>
+                <TabsTrigger className="cursor-pointer" value="likes">
+                  Most likes
+                </TabsTrigger>
+              </Link>
             </TabsList>
-            <div className="flex items-center gap-4">
-              <ButtonGroup>
-                <Input placeholder="Search..." />
-                <Button variant="outline" aria-label="Search">
-                  <SearchIcon />
-                </Button>
-              </ButtonGroup>
-              <RotateCcw
-                size={22}
-                className="stroke-2 stroke-muted-foreground cursor-pointer"
-              />
-            </div>
+
+            <ArenaOptions />
           </div>
 
-          <TabsContent className="pt-4" value="newest">
+          {/* We only render one set of content logic here. 
+              The server fetches the data based on currentTab and searchQuery.
+          */}
+          <TabsContent className="pt-4" value={currentTab}>
             <div>
-              <ArenaChallengeCard />
-            </div>
-          </TabsContent>
-          <TabsContent className="pt-4" value="votes">
-            <div>
-              <ArenaChallengeCard />
-            </div>
-          </TabsContent>
-          <TabsContent className="pt-4" value="likes">
-            <div>
-              <ArenaChallengeCard />
+              {/* Pass the search and sort params down to fetch the right data */}
+              <ArenaChallengeCard sort={currentTab} search={searchQuery} />
             </div>
           </TabsContent>
         </Tabs>

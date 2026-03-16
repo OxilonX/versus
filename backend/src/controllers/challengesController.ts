@@ -41,12 +41,33 @@ export const createChallenge = async (req: Request, res: Response) => {
 export const getChallenges = async (req: Request, res: Response) => {
   try {
     const currentUserId = req.user?.id;
+    const { sort, search } = req.query;
+
+    const whereClause = search
+      ? {
+          OR: [
+            { title: { contains: search as string, mode: "insensitive" as const } },
+            { user: { name: { contains: search as string, mode: "insensitive" as const } } },
+          ],
+        }
+      : {};
+
+    let orderBy: any = { createdAt: "desc" };
+    if (sort === "votes") {
+      orderBy = {
+        votes: { _count: "desc" },
+      };
+    } else if (sort === "likes") {
+      orderBy = {
+        like: { _count: "desc" },
+      };
+    }
+
     const challenges = await prisma.challenge.findMany({
-      take: 5,
+      take: 20,
       skip: 0,
-      orderBy: {
-        createdAt: "desc",
-      },
+      where: whereClause,
+      orderBy,
       select: {
         id: true,
         title: true,

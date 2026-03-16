@@ -45,9 +45,20 @@ interface Challenge {
     totalVotes: number;
   };
 }
-const fetchChallenges = async () => {
+interface ArenaChallengeCardProps {
+  sort: string;
+  search: string;
+}
+
+const fetchChallenges = async (sort?: string, search?: string) => {
   try {
-    const response = await fetch("/api/challenges", {
+    const params = new URLSearchParams();
+    if (sort) params.set("sort", sort);
+    if (search) params.set("search", search);
+    const queryString = params.toString();
+    const url = queryString ? `/api/challenges?${queryString}` : "/api/challenges";
+    
+    const response = await fetch(url, {
       method: "GET",
       credentials: "include",
     });
@@ -81,7 +92,7 @@ const likeChallenge = async (challengeId: string) => {
     });
   }
 };
-const ArenaChallengeCard = () => {
+const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
   const [isFetchingChallenges, setIsFetchingChallenges] = useState(true);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [votingChallengeId, setVotingChallengeId] = useState<string | null>(null);
@@ -180,14 +191,15 @@ const ArenaChallengeCard = () => {
   };
   useEffect(() => {
     const loadChallenges = async () => {
-      const data = await fetchChallenges();
+      setIsFetchingChallenges(true);
+      const data = await fetchChallenges(sort, search);
       if (data) {
         setChallenges(data);
         setIsFetchingChallenges(false);
       }
     };
     loadChallenges();
-  }, []);
+  }, [sort, search]);
 
   return (
     <div>
