@@ -12,10 +12,23 @@ export const createItem = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Item name is required" });
     }
 
+    const finalImageUrl = !imageUrl || imageUrl.trim() === "" || !isValidUrl(imageUrl) 
+      ? "/images/default_item_v1.jpeg" 
+      : imageUrl;
+
+    function isValidUrl(url: string): boolean {
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
     const newItem = await prisma.item.create({
       data: {
         name,
-        imageUrl: imageUrl || "image.example.com",
+        imageUrl: finalImageUrl,
         isPublic: isPublic ?? true,
         user: { connect: { id: user.id } },
       },

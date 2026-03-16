@@ -103,7 +103,7 @@ model Challenge {
 model Item {
   id         String          @id @default(cuid())
   name       String
-  imageUrl   String?         @default("image.example.com")
+  imageUrl   String?         @default("/images/default_item_v1.jpeg")
   isPublic   Boolean         @default(true)
   userId     String
   user       User            @relation(fields: [userId], references: [id])
