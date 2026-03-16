@@ -9,16 +9,16 @@ interface PageProps {
 }
 
 const ArenaPage = async ({ searchParams }: PageProps) => {
-  // Await the searchParams in Next.js 15+ Server Components
   const params = await searchParams;
 
-  // Extract values or set defaults
   const currentTab = (params.tab as string) || "newest";
   const searchQuery = (params.search as string) || "";
 
   const getTabLink = (tab: string) => {
     const base = `?tab=${tab}`;
-    return searchQuery ? `${base}&search=${encodeURIComponent(searchQuery)}` : base;
+    return searchQuery
+      ? `${base}&search=${encodeURIComponent(searchQuery)}`
+      : base;
   };
 
   return (
@@ -30,7 +30,6 @@ const ArenaPage = async ({ searchParams }: PageProps) => {
       </div>
 
       <div className="flex items-center justify-between">
-        {/* 'value' is driven by the URL, which handles the active styling automatically */}
         <Tabs value={currentTab} className="w-full">
           <div className="flex items-center justify-between">
             <TabsList>
@@ -56,12 +55,8 @@ const ArenaPage = async ({ searchParams }: PageProps) => {
             <ArenaOptions />
           </div>
 
-          {/* We only render one set of content logic here. 
-              The server fetches the data based on currentTab and searchQuery.
-          */}
           <TabsContent className="pt-4" value={currentTab}>
             <div>
-              {/* Pass the search and sort params down to fetch the right data */}
               <ArenaChallengeCard sort={currentTab} search={searchQuery} />
             </div>
           </TabsContent>

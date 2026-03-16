@@ -21,7 +21,7 @@ const ArenaOptions = () => {
 
   const reset = () => {
     setQuery("");
-    router.push("/arena"); // Or your base path
+    router.push("/arena");
   };
 
   return (

@@ -56,8 +56,10 @@ const fetchChallenges = async (sort?: string, search?: string) => {
     if (sort) params.set("sort", sort);
     if (search) params.set("search", search);
     const queryString = params.toString();
-    const url = queryString ? `/api/challenges?${queryString}` : "/api/challenges";
-    
+    const url = queryString
+      ? `/api/challenges?${queryString}`
+      : "/api/challenges";
+
     const response = await fetch(url, {
       method: "GET",
       credentials: "include",
@@ -95,7 +97,9 @@ const likeChallenge = async (challengeId: string) => {
 const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
   const [isFetchingChallenges, setIsFetchingChallenges] = useState(true);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [votingChallengeId, setVotingChallengeId] = useState<string | null>(null);
+  const [votingChallengeId, setVotingChallengeId] = useState<string | null>(
+    null,
+  );
   const handleLike = async (challengeId: string) => {
     const previousChallenges = [...challenges];
     setChallenges((prev) =>
@@ -133,7 +137,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
   };
   const handleVote = async (challengeId: string, itemId: string) => {
     if (votingChallengeId) return;
-    
+
     setVotingChallengeId(challengeId);
     const result = await voteChallenge(challengeId, itemId);
     setVotingChallengeId(null);
@@ -150,7 +154,10 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
         const previousVotedItemId = c.userVotedItemId;
         const isRemovingVote = result.status === "neutral";
         const isNewVote = result.status === "voted" && !previousVotedItemId;
-        const isSwitchingVote = result.status === "voted" && previousVotedItemId && previousVotedItemId !== itemId;
+        const isSwitchingVote =
+          result.status === "voted" &&
+          previousVotedItemId &&
+          previousVotedItemId !== itemId;
 
         const updatedItems = c.items.map((item) => {
           let newVotes = item._count.votes;
@@ -181,8 +188,10 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
           items: updatedItems,
           userVotedItemId: isRemovingVote ? null : itemId,
           stats: {
-            item1Percent: totalVotes > 0 ? Math.round((item1Votes / totalVotes) * 100) : 0,
-            item2Percent: totalVotes > 0 ? Math.round((item2Votes / totalVotes) * 100) : 0,
+            item1Percent:
+              totalVotes > 0 ? Math.round((item1Votes / totalVotes) * 100) : 0,
+            item2Percent:
+              totalVotes > 0 ? Math.round((item2Votes / totalVotes) * 100) : 0,
             totalVotes,
           },
         };
@@ -259,7 +268,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                           fill
                           sizes="100px"
                           className={`relative z-20 w-full object-cover brightness-100  
-                        dark:brightness-80 transition-all duration-500 group-hover:brightness-60 
+                        transition-all duration-500 group-hover:brightness-60 
                         ${c.userVotedItemId && c.stats?.item1Percent < c.stats?.item2Percent ? "birightness-40" : ""}`}
                         />
                       </div>
@@ -273,7 +282,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                       <h1 className="text-3xl font-bold capitalize text-white">
                         {c.items[0].item.name}
                       </h1>
-                      <p className="text-sm font-medium text-muted ">
+                      <p className="text-sm font-medium text-muted dark:text-gray-300 ">
                         Created at :{" "}
                         {new Date(c.createdAt).toLocaleDateString()}
                       </p>
@@ -297,7 +306,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                           fill
                           sizes="100px"
                           className={`relative z-20 w-full object-cover brightness-100  
-                        dark:brightness-80 transition-all duration-500 group-hover:brightness-60 
+                         transition-all duration-500 group-hover:brightness-60 
                         ${c.userVotedItemId && c.stats?.item2Percent < c.stats?.item1Percent ? "birightness-40" : ""}`}
                         />
                       </div>
@@ -312,7 +321,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                       <h1 className="text-3xl font-bold capitalize text-white">
                         {c.items[1].item.name}
                       </h1>
-                      <p className="text-sm font-medium text-muted ">
+                      <p className="text-sm font-medium text-muted dark:text-gray-300  ">
                         Created at :{new Date(c.createdAt).toLocaleDateString()}
                       </p>
                     </div>

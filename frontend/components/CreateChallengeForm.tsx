@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CreateChallengeItem from "./CreateChallengeItem";
 import { useState, useCallback, memo } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { router } from "better-auth/api";
 //local comps imports
 const CreateChallengeForm = () => {
   const [challengeInput, setChallengeInput] = useState("");
@@ -15,7 +17,7 @@ const CreateChallengeForm = () => {
   const [secondnItemId, setSecondItemId] = useState<string>("");
   const setFirst = useCallback((id: string) => setFirstItemId(id), []);
   const setSecond = useCallback((id: string) => setSecondItemId(id), []);
-
+  const router = useRouter();
   const initChallengeHandleClick = useCallback(async () => {
     if (!challengeInput.trim()) {
       return toast.warning("Name required", {
@@ -55,7 +57,10 @@ const CreateChallengeForm = () => {
     toast.promise(createChallengeAction(), {
       closeButton: false,
       loading: "Initializing battle arena...",
-      success: (data) => `${data.title} is live! Ready for battle?`,
+      success: (data) => {
+        router.push("/arena");
+        return `${data.title} is live! Ready for battle?`;
+      },
       error: (err) => err.message,
     });
   }, [challengeInput, firstItemId, secondnItemId]);
