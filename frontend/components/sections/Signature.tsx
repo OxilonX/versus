@@ -1,16 +1,13 @@
 "use client";
 import { signatureInfo } from "@/utils/SignatureVars";
 import Image from "next/image";
+import { useState } from "react";
 import { motion, Variants } from "motion/react";
+
+// 1. Move Variants and Sub-components OUTSIDE the main component
 const titleVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 20,
-    filter: "blur(8px)",
-    color: "var(--muted-foreground)",
-  },
+  hidden: { y: 20, filter: "blur(8px)", color: "var(--muted-foreground)" },
   visible: {
-    opacity: 1,
     y: 0,
     filter: "blur(0px)",
     color: "var(--foreground)",
@@ -18,7 +15,7 @@ const titleVariants: Variants = {
       type: "spring",
       stiffness: 100,
       damping: 20,
-      staggerChildren: 0.03, // Slightly slower for better readability
+      staggerChildren: 0.025,
       delayChildren: 0.2,
     },
   },
@@ -26,117 +23,104 @@ const titleVariants: Variants = {
 
 const wordVariants: Variants = {
   hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: "easeOut" },
-  },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
-export const SignatureTitle = () => {
-  return (
-    <motion.h1
-      variants={titleVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
-      className="text-6xl leading-[1.1] font-black w-[80%] tracking-tight"
-    >
-      {signatureInfo.title.split(" ").map((word, i) => (
-        <span key={i} className="inline-block whitespace-nowrap">
-          {word.split("").map((char, j) => (
-            <motion.span
-              key={j}
-              variants={wordVariants}
-              className="inline-block"
-            >
-              {char}
-            </motion.span>
-          ))}
-          <span className="inline-block">&nbsp;</span>
-        </span>
-      ))}
-    </motion.h1>
-  );
-};
+// Sub-component for Title
+const SignatureTitle = ({ onComplete }: { onComplete: () => void }) => (
+  <motion.h1
+    variants={titleVariants}
+    initial="hidden"
+    whileInView="visible"
+    onAnimationComplete={onComplete}
+    viewport={{ once: true, amount: 0.3 }}
+    className="text-6xl leading-[1.1] font-black w-[80%] tracking-tight"
+  >
+    {signatureInfo.title.split(" ").map((word, i) => (
+      <span key={i} className="inline-block whitespace-nowrap">
+        {word.split("").map((char, j) => (
+          <motion.span key={j} variants={wordVariants} className="inline-block">
+            {char}
+          </motion.span>
+        ))}
+        <span className="inline-block">&nbsp;</span>
+      </span>
+    ))}
+  </motion.h1>
+);
 
-export const SignatureParagraph = () => {
+// Sub-component for Paragraph
+const SignatureParagraph = ({ isVisible }: { isVisible: boolean }) => {
   const container: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.008,
-        delayChildren: 1,
-      },
+      transition: { staggerChildren: 0.008, delayChildren: 0.2 },
     },
-  };
-
-  const charVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
   };
 
   return (
     <motion.p
       variants={container}
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
+      animate={isVisible ? "visible" : "hidden"}
       className="text-xl leading-relaxed font-medium w-[65%] text-muted-foreground mt-6"
     >
       {signatureInfo.description.split("").map((char, i) => (
-        <motion.span key={i} variants={charVariants}>
+        <motion.span
+          key={i}
+          variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+        >
           {char}
         </motion.span>
       ))}
     </motion.p>
   );
 };
+
 const Signature = () => {
+  const [titleDone, setTitleDone] = useState(false);
+
   return (
     <div className="flex flex-col gap-10">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         whileInView={{ opacity: 1, y: 0, transition: { duration: 1 } }}
-        viewport={{ once: false }}
+        viewport={{ once: true }}
         className="flex items-center"
       >
-        <span className="h-0.5 bg-muted w-full rounded-full"></span>{" "}
+        <span className="h-0.5 bg-muted w-full rounded-full"></span>
         <Image
           src="/images/badge.png"
-          alt="badge image"
+          alt="badge"
           width={100}
           height={100}
-          className=""
+          className="mx-4"
         />
         <span className="h-0.5 bg-muted w-full rounded-full"></span>
       </motion.div>
-      <div className="flex flex-col gap-8 items-center text-center ">
-        <SignatureTitle />
-        <SignatureParagraph />
+
+      <div className="flex flex-col gap-8 items-center text-center">
+        <SignatureTitle onComplete={() => setTitleDone(true)} />
+        <SignatureParagraph isVisible={titleDone} />
       </div>
+
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        whileInView={{ opacity: 1, y: 0, transition: { duration: 1 } }}
-        viewport={{ once: false }}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
         className="flex flex-col items-center gap-2"
       >
         <Image
           src="/icons/signature.png"
-          alt="signature image"
+          alt="signature"
           width={400}
           height={400}
-          className="dark:invert-100 "
+          className="dark:invert"
         />
-        <motion.p
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0, transition: { duration: 0.2 } }}
-          viewport={{ once: false }}
-          className="text-[8px] text-center text-foreground font-bold -mt-7"
-        >
-          <span className="text-primary ">{"founder "}</span>B. Abderrahmane
-        </motion.p>
+        <p className="text-[10px] text-center text-foreground font-bold -mt-10 uppercase tracking-widest">
+          <span className="text-primary">founder </span> B. Abderrahmane
+        </p>
       </motion.div>
     </div>
   );

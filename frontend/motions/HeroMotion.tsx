@@ -39,7 +39,7 @@ export const ImageMotion = ({ url, alt }: { url: string; alt: string }) => {
       viewport={{ once: false, amount: 0.3 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
       drag
-      dragConstraints={{ top: -50, left: -200, right: 50, bottom: 50 }}
+      dragConstraints={{ top: -50, left: -200, right: 0, bottom: 0 }}
       dragSnapToOrigin
       className="cursor-grab relative z-20"
     >

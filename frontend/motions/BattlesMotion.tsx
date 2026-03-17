@@ -48,6 +48,7 @@ export const BattlesListMotion = ({ battles }: battlesProps) => {
       {Array.isArray(battles) &&
         battles.map((b, index) => {
           const isFirst = index === 0;
+          const isSecond = index === 1;
 
           return (
             <motion.li
@@ -78,6 +79,7 @@ export const BattlesListMotion = ({ battles }: battlesProps) => {
                   pointer-events-none absolute w-80 h-48 shadow-2xl z-100 
                   transition-all duration-300 ease-out right-2
                   ${isFirst ? "top-2" : "bottom-2"}
+                  ${isSecond ? "-top-[90%]" : ""}
                 `}
               >
                 <Image
