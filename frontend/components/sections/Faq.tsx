@@ -1,3 +1,4 @@
+"use client";
 import {
   Accordion,
   AccordionContent,
@@ -5,10 +6,16 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { faqs } from "@/utils/FaqVars";
+import { SectionHeaders } from "@/motions/GlobalMotion";
+import { motion } from "motion/react";
 const Faq = () => {
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="hd-font text-3xl font-black uppercase ">FAQ</h1>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0, transition: { duration: 0.5 } }}
+      className="flex flex-col gap-4"
+    >
+      <SectionHeaders>FAQ</SectionHeaders>
       <ul>
         <li className="overflow-hidden rounded-xl">
           <Accordion
@@ -34,7 +41,7 @@ const Faq = () => {
           </Accordion>
         </li>
       </ul>
-    </div>
+    </motion.div>
   );
 };
 

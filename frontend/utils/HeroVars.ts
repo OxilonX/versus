@@ -16,11 +16,11 @@ export const characs = [
   },
 ];
 export const heroInfo = {
-  header: "Facts Versus Popular Belief",
-  paragraph: `Settle the internet's oldest debates with a single tap.
-Cast your vote to turn subjective arguments into data.
-Track realtime rankings as the global community decides.
-See if your favorite takes can finally reign supreme.`,
+  header: `Facts Versus \n Popular Belief`,
+  paragraph: `Settle the internet's oldest debates with a single tap
+Cast your vote to turn subjective arguments into data
+Track realtime rankings as the global community decides
+See if your favorite takes can finally reign supreme`,
   url: "/images/argument_office.png",
 };
 export const avatars = [
