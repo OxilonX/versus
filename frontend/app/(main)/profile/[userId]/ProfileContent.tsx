@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Grid3X3,
   Bookmark,
-  SquareUser,
-  Settings,
+
   Share,
   Check,
   Copy,

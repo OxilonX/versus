@@ -38,6 +38,8 @@ import { useEffect, useState } from "react";
 import { Spinner } from "./ui/spinner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+//motions
+import { AnimatePresence, motion, Variants } from "motion/react";
 //types
 interface Challenge {
   id: string;
@@ -239,203 +241,249 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
     loadChallenges();
   }, [sort, search]);
   const router = useRouter();
+  const container: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const child: Variants = {
+    hidden: { opacity: 0, y: 30, scale: 0.98 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: "spring", stiffness: 260, damping: 25 },
+    },
+  };
   return (
     <div>
       <div>
-        <ul className="w-full flex flex-col gap-8">
+        <motion.ul
+          key={challenges?.length}
+          variants={container}
+          initial="hidden"
+          animate="visible"
+          className="w-full flex flex-col gap-8"
+        >
           {isFetchingChallenges ? (
             <div className="bg-background flex items-center justify-center min-h-screen">
               <Spinner className="size-8" />
             </div>
           ) : (
-            Array.isArray(challenges) &&
-            challenges.map((c) => (
-              <li key={c.id}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Avatar
-                      className="cursor-pointer"
-                      onClick={() => {
-                        router.push(`/profile/${c.userId}`);
-                      }}
-                    >
-                      <AvatarImage
-                        src={c?.user?.image || "https://github.com/shadcn.png"}
-                        alt="@shadcn"
-                      />
-                      <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                    <h1>{c.user?.name}</h1>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost">
-                        <Ellipsis size={30} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem>
-                          <TriangleAlert />
-                          Report Challenge
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+            <AnimatePresence mode="popLayout">
+              {Array.isArray(challenges) &&
+                challenges.map((c) => (
+                  <motion.li variants={child} key={c.id}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Avatar
+                          className="cursor-pointer"
+                          onClick={() => {
+                            router.push(`/profile/${c.userId}`);
+                          }}
+                        >
+                          <AvatarImage
+                            src={
+                              c?.user?.image || "https://github.com/shadcn.png"
+                            }
+                            alt="@shadcn"
+                          />
+                          <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+                        <h1>{c.user?.name}</h1>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost">
+                            <Ellipsis size={30} />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem>
+                              <TriangleAlert />
+                              Report Challenge
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
 
-                <div className="relative grid-rows-[300px] py-2 grid grid-cols-2 gap-1 w-full overflow-hidden transition-opacity duration-500">
-                  <Card
-                    onClick={() => handleVote(c.id, c.items[0].itemId)}
-                    key={c.items[0].itemId}
-                    className={`relative z-5 w-full pt-0 group cursor-pointer ${votingChallengeId === c.id ? "opacity-50 pointer-events-none" : ""}`}
-                  >
-                    <div className="absolute inset-0 z-30 aspect-video dark:bg-black/10" />
-                    {c.items[0].item.imageUrl ? (
-                      <div className="w-full h-full">
-                        <Image
-                          src={
-                            c.items[0].item.imageUrl ||
-                            "/images/default_item_v1.jpeg"
-                          }
-                          alt="Event cover"
-                          fill
-                          sizes="100px"
-                          className={`relative z-20 w-full object-cover brightness-100  
+                    <div className="relative grid-rows-[300px] py-2 grid grid-cols-2 gap-1 w-full overflow-hidden transition-opacity duration-500">
+                      <Card
+                        onClick={() => handleVote(c.id, c.items[0].itemId)}
+                        key={c.items[0].itemId}
+                        className={`relative z-5 w-full pt-0 group cursor-pointer ${votingChallengeId === c.id ? "opacity-50 pointer-events-none" : ""}`}
+                      >
+                        <div className="absolute inset-0 z-30 aspect-video dark:bg-black/10" />
+                        {c.items[0].item.imageUrl ? (
+                          <div className="w-full h-full">
+                            <Image
+                              src={
+                                c.items[0].item.imageUrl ||
+                                "/images/default_item_v1.jpeg"
+                              }
+                              alt="Event cover"
+                              fill
+                              sizes="100px"
+                              className={`relative z-20 w-full object-cover brightness-100  
                         transition-all duration-500 group-hover:brightness-60 
                         ${c.userVotedItemId && c.stats?.item1Percent < c.stats?.item2Percent ? "birightness-40" : ""}`}
-                        />
-                      </div>
-                    ) : null}
-                    {c.userVotedItemId && (
-                      <div className="absolute z-100 w-full h-[80%] flex items-center justify-center italic font-black text-primary text-[8rem]">
-                        <p>{c?.stats?.item1Percent}%</p>
-                      </div>
-                    )}
-                    <div className="opacity-0 group-hover:opacity-100 absolute bottom-5 left-5 z-100  transition-opacity duration-500 ">
-                      <h1 className="text-3xl font-bold capitalize text-white">
-                        {c.items[0].item.name}
-                      </h1>
-                      <p className="text-sm font-medium text-muted dark:text-gray-300 ">
-                        Created at :{" "}
-                        {new Date(c.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </Card>
+                            />
+                          </div>
+                        ) : null}
+                        <AnimatePresence>
+                          {c.userVotedItemId && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute z-100 w-full h-[80%] flex items-center justify-center italic font-black text-primary text-[8rem]"
+                            >
+                              <p>{c?.stats?.item1Percent}%</p>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                        <div className="opacity-0 group-hover:opacity-100 absolute bottom-5 left-5 z-100  transition-opacity duration-500 ">
+                          <h1 className="text-3xl font-bold capitalize text-white">
+                            {c.items[0].item.name}
+                          </h1>
+                          <p className="text-sm font-medium text-muted dark:text-gray-300 ">
+                            Created at :{" "}
+                            {new Date(c.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </Card>
 
-                  <Card
-                    key={c.items[1].itemId}
-                    onClick={() => handleVote(c.id, c.items[1].itemId)}
-                    className={`relative ml-auto z-5 w-full pt-0 group cursor-pointer ${votingChallengeId === c.id ? "opacity-50 pointer-events-none" : ""}`}
-                  >
-                    <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
-                    {c.items[1].item.imageUrl ? (
-                      <div className="w-full h-full">
-                        <Image
-                          src={
-                            c.items[1].item.imageUrl ||
-                            "/images/default_item_v1.jpeg"
-                          }
-                          alt="Event cover"
-                          fill
-                          sizes="100px"
-                          className={`relative z-20 w-full object-cover brightness-100  
+                      <Card
+                        key={c.items[1].itemId}
+                        onClick={() => handleVote(c.id, c.items[1].itemId)}
+                        className={`relative ml-auto z-5 w-full pt-0 group cursor-pointer ${votingChallengeId === c.id ? "opacity-50 pointer-events-none" : ""}`}
+                      >
+                        <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
+                        {c.items[1].item.imageUrl ? (
+                          <div className="w-full h-full">
+                            <Image
+                              src={
+                                c.items[1].item.imageUrl ||
+                                "/images/default_item_v1.jpeg"
+                              }
+                              alt="Event cover"
+                              fill
+                              sizes="100px"
+                              className={`relative z-20 w-full object-cover brightness-100  
                          transition-all duration-500 group-hover:brightness-60 
                         ${c.userVotedItemId && c.stats?.item2Percent < c.stats?.item1Percent ? "birightness-40" : ""}`}
-                        />
-                      </div>
-                    ) : null}
-                    {c.userVotedItemId && (
-                      <div className="absolute z-100 w-full h-[80%] flex items-center justify-center italic font-black text-primary text-[8rem]">
-                        <p>{c?.stats?.item2Percent}%</p>
-                      </div>
-                    )}
-
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500  absolute bottom-5 left-5 z-100">
-                      <h1 className="text-3xl font-bold capitalize text-white">
-                        {c.items[1].item.name}
-                      </h1>
-                      <p className="text-sm font-medium text-muted dark:text-gray-300  ">
-                        Created at :{new Date(c.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </Card>
-                </div>
-                <div className="">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Heart
-                        onClick={() => handleLike(c.id)}
-                        className={
-                          c.isLiked
-                            ? "stroke-0 fill-primary cursor-pointer"
-                            : "stroke-2 cursor-pointer"
-                        }
-                      />
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Share className="stroke-2 cursor-pointer" />
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-md">
-                          <DialogHeader>
-                            <DialogTitle>Share challenge link</DialogTitle>
-                            <DialogDescription>
-                              Anyone who has this link will be able to view this
-                              challenge and interact with it if logged in.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="flex items-center space-x-2 pt-2">
-                            <div className="grid flex-1 gap-2">
-                              <Label htmlFor="link" className="sr-only">
-                                Link
-                              </Label>
-                              <Input
-                                id="link"
-                                className="h-9 bg-muted/50 font-mono text-xs"
-                                value={`${typeof window !== "undefined" ? window.location.origin : ""}/arena/${c.id}`}
-                                readOnly
-                              />
-                            </div>
-                            <Button
-                              type="submit"
-                              size="sm"
-                              className="px-3"
-                              onClick={() => handleCopy(c.id)}
-                            >
-                              <span className="sr-only">Copy</span>
-                              {copied ? (
-                                <Check className="size-4" />
-                              ) : (
-                                <Copy className="size-4" />
-                              )}
-                            </Button>
+                            />
                           </div>
-                          <DialogFooter className="sm:justify-start">
-                            <DialogClose asChild>
-                              <Button type="button">Close</Button>
-                            </DialogClose>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
+                        ) : null}
+                        <AnimatePresence>
+                          {c.userVotedItemId && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute z-100 w-full h-[80%] flex items-center justify-center italic font-black text-primary text-[8rem]"
+                            >
+                              <p>{c?.stats?.item2Percent}%</p>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500  absolute bottom-5 left-5 z-100">
+                          <h1 className="text-3xl font-bold capitalize text-white">
+                            {c.items[1].item.name}
+                          </h1>
+                          <p className="text-sm font-medium text-muted dark:text-gray-300  ">
+                            Created at :
+                            {new Date(c.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </Card>
                     </div>
-                    <Bookmark className="stroke-2 cursor-pointer" />
-                  </div>
-                  <div className="pt-1 flex items-center text-muted-foreground font-medium text-xs">
-                    {c.likesCount} likes
-                  </div>
-                  <div className="flex items-center gap-2 ">
-                    <p className="text-foreground font-bold text-sm">
-                      {c.user.name || "user name"}
-                    </p>
-                    <p className="text-foreground/80 font-medium text-sm">
-                      {c.title}
-                    </p>
-                  </div>
-                </div>
-              </li>
-            ))
+                    <div className="">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Heart
+                            onClick={() => handleLike(c.id)}
+                            className={
+                              c.isLiked
+                                ? "stroke-0 fill-primary cursor-pointer"
+                                : "stroke-2 cursor-pointer"
+                            }
+                          />
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Share className="stroke-2 cursor-pointer" />
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Share challenge link</DialogTitle>
+                                <DialogDescription>
+                                  Anyone who has this link will be able to view
+                                  this challenge and interact with it if logged
+                                  in.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="flex items-center space-x-2 pt-2">
+                                <div className="grid flex-1 gap-2">
+                                  <Label htmlFor="link" className="sr-only">
+                                    Link
+                                  </Label>
+                                  <Input
+                                    id="link"
+                                    className="h-9 bg-muted/50 font-mono text-xs"
+                                    value={`${typeof window !== "undefined" ? window.location.origin : ""}/arena/${c.id}`}
+                                    readOnly
+                                  />
+                                </div>
+                                <Button
+                                  type="submit"
+                                  size="sm"
+                                  className="px-3"
+                                  onClick={() => handleCopy(c.id)}
+                                >
+                                  <span className="sr-only">Copy</span>
+                                  {copied ? (
+                                    <Check className="size-4" />
+                                  ) : (
+                                    <Copy className="size-4" />
+                                  )}
+                                </Button>
+                              </div>
+                              <DialogFooter className="sm:justify-start">
+                                <DialogClose asChild>
+                                  <Button type="button">Close</Button>
+                                </DialogClose>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                        <Bookmark className="stroke-2 cursor-pointer" />
+                      </div>
+                      <div className="pt-1 flex items-center text-muted-foreground font-medium text-xs">
+                        {c.likesCount} likes
+                      </div>
+                      <div className="flex items-center gap-2 ">
+                        <p className="text-foreground font-bold text-sm">
+                          {c.user.name || "user name"}
+                        </p>
+                        <p className="text-foreground/80 font-medium text-sm">
+                          {c.title}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.li>
+                ))}
+            </AnimatePresence>
           )}
-        </ul>
+        </motion.ul>
       </div>
     </div>
   );

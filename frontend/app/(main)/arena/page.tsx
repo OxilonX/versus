@@ -3,6 +3,7 @@ import Link from "next/link";
 // local comps imports
 import ArenaChallengeCard from "@/components/ArenaChallengeCard";
 import ArenaOptions from "@/components/ArenaOptions";
+import { SectionHeaders } from "@/motions/GlobalMotion";
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -24,9 +25,7 @@ const ArenaPage = async ({ searchParams }: PageProps) => {
   return (
     <div className="py-10">
       <div className="pb-4">
-        <h1 className="hd-font text-3xl font-black uppercase ">
-          Watch Your Challenges
-        </h1>
+        <SectionHeaders>Watch Your Challenges</SectionHeaders>
       </div>
 
       <div className="flex items-center justify-between">

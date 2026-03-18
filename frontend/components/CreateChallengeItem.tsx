@@ -16,7 +16,7 @@ import { SearchIcon } from "lucide-react";
 import Image from "next/image";
 //next imports
 import Link from "next/link";
-
+import { motion } from "motion/react";
 const DEFAULT_IMAGE = "/images/default_item_v1.jpeg";
 
 const isValidImageSrc = (url: string): boolean => {
@@ -237,7 +237,11 @@ const CreateChallengeItem = memo(
       });
     }, [formData]);
     return (
-      <div className="flex flex-col justify-center items-center ">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        className="flex flex-col justify-center items-center "
+      >
         <Tabs defaultValue="search" className="w-full">
           <TabsList className="w-full py-6">
             <TabsTrigger
@@ -255,7 +259,11 @@ const CreateChallengeItem = memo(
           </TabsList>
 
           <TabsContent value="search">
-            <div className="w-full py-4 ">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="w-full py-4 "
+            >
               <div className="space-y-2">
                 <Label htmlFor="search-item" className="text-foreground">
                   Search Item
@@ -317,11 +325,15 @@ const CreateChallengeItem = memo(
                   ))}
                 </ul>
               </ScrollArea>
-            </div>{" "}
+            </motion.div>{" "}
           </TabsContent>
 
           <TabsContent value="add">
-            <div className="w-full py-4">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="w-full py-4"
+            >
               <div className="space-y-2">
                 <Label htmlFor="item-name" className="text-foreground">
                   Item Name
@@ -389,30 +401,61 @@ const CreateChallengeItem = memo(
                 </p>
               </div>
               <div className="flex justify-between items-center">
-                <div className="flex items-center justify-between gap-8 py-2">
-                  <Label
-                    htmlFor="public-toggle"
-                    className="cursor-pointer text-primary font-bold text-nowrap"
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1, transition: { duration: 0.3 } }}
+                  className="flex items-center justify-between gap-8 py-2"
+                >
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1, transition: { duration: 0.3 } }}
                   >
-                    Make Public ?
-                  </Label>
-                  <Switch
-                    id="public-toggle"
-                    checked={formData.isPublic}
-                    onCheckedChange={(checked: boolean) =>
-                      setFormData({ ...formData, isPublic: checked })
-                    }
-                  />
-                </div>
-                <Button onClick={handleAddItem} className="px-8 font-bold">
-                  Add Item
-                </Button>
+                    <Label
+                      htmlFor="public-toggle"
+                      className="cursor-pointer text-primary font-bold text-nowrap"
+                    >
+                      Make Public ?
+                    </Label>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1, transition: { duration: 0.5 } }}
+                  >
+                    <Switch
+                      className="cursor-pointer"
+                      id="public-toggle"
+                      checked={formData.isPublic}
+                      onCheckedChange={(checked: boolean) =>
+                        setFormData({ ...formData, isPublic: checked })
+                      }
+                    />
+                  </motion.div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className=""
+                >
+                  <Button onClick={handleAddItem} className="px-8 font-bold">
+                    Add Item
+                  </Button>
+                </motion.div>
               </div>
               <div className="flex flex-col gap-4 pt-4">
-                <h3 className="text-2xl font-bold capitalize text-muted-foreground">
+                <motion.h3
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1, transition: { duration: 0.3 } }}
+                  className="text-2xl font-bold capitalize text-muted-foreground"
+                >
                   Item Preview
-                </h3>
-                <div className="flex items-start gap-10 w-full">
+                </motion.h3>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1, transition: { duration: 0.3 } }}
+                  className="flex items-start gap-10 w-full"
+                >
                   <div className="relative w-[150px] h-[150px] overflow-hidden rounded-md border border-border bg-muted shrink-0">
                     <Image
                       src={getImageSrc(formData.imageUrl)}
@@ -475,12 +518,12 @@ const CreateChallengeItem = memo(
                       </li>
                     </ul>
                   </div>
-                </div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           </TabsContent>
         </Tabs>
-      </div>
+      </motion.div>
     );
   },
 );

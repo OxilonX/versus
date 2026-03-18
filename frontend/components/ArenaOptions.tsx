@@ -1,4 +1,4 @@
-"use client"; // Required for interactivity
+"use client";
 
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { SearchIcon, RotateCcw } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-
+import { motion } from "motion/react";
 const ArenaOptions = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -25,7 +25,12 @@ const ArenaOptions = () => {
   };
 
   return (
-    <div className="flex items-center gap-4">
+    <motion.div
+      className="flex items-center gap-4"
+      initial={{ opacity: 0, y: -20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ margin: "-50px" }}
+    >
       <ButtonGroup>
         <Input
           placeholder="Search..."
@@ -42,7 +47,7 @@ const ArenaOptions = () => {
         className="stroke-2 stroke-muted-foreground cursor-pointer hover:rotate-180 transition-transform"
         onClick={reset}
       />
-    </div>
+    </motion.div>
   );
 };
 

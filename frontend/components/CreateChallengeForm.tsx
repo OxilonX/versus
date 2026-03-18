@@ -1,6 +1,5 @@
 "use client";
 //shadcn imports
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,10 @@ import CreateChallengeItem from "./CreateChallengeItem";
 import { useState, useCallback, memo } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+//import motions
+import { motion } from "motion/react";
 //local comps imports
+import { SectionHeaders } from "@/motions/GlobalMotion";
 const CreateChallengeForm = () => {
   const [challengeInput, setChallengeInput] = useState("");
   const [firstItemId, setFirstItemId] = useState<string>("");
@@ -66,13 +68,19 @@ const CreateChallengeForm = () => {
   return (
     <div className="py-10">
       <div className="pb-4">
-        <h1 className="hd-font text-3xl font-black uppercase ">
-          Create Your Challenge
-        </h1>
+        <SectionHeaders>Create Your Challenge</SectionHeaders>
       </div>
-      <div className="flex flex-col gap-4 bg-card-offset px-6 py-8 rounded-lg shadow-md">
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0, transition: { duration: 0.5 } }}
+        className="flex flex-col gap-4 bg-card-offset px-6 py-8 rounded-lg shadow-md"
+      >
         <div>
-          <div className="space-y-2">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="space-y-2"
+          >
             <Label htmlFor="challenge-name" className="text-muted-foreground">
               Challenge Name
             </Label>
@@ -83,9 +91,9 @@ const CreateChallengeForm = () => {
               onChange={(e) => setChallengeInput(e.target.value)}
               className="text-lg md:text-xl py-6 font-black placeholder:text-muted-foreground/20"
             />
-          </div>
+          </motion.div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-4">
+        <motion.div className="grid grid-cols-1 md:grid-cols-2 items-start gap-4">
           <Card className="h-160  shadow-lg">
             <CardHeader>
               <CardTitle>First Item</CardTitle>
@@ -106,8 +114,14 @@ const CreateChallengeForm = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-        <div className="pt-4 flex justify-center">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="pt-4 flex justify-center"
+        >
           <Button
             onClick={initChallengeHandleClick}
             size="lg"
@@ -115,8 +129,8 @@ const CreateChallengeForm = () => {
           >
             Initialize Battle
           </Button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
