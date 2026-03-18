@@ -16,7 +16,7 @@ const titleVariants: Variants = {
       stiffness: 100,
       damping: 20,
       staggerChildren: 0.025,
-      delayChildren: 0.2,
+      delayChildren: 0,
     },
   },
 };
@@ -26,7 +26,6 @@ const wordVariants: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
-// Sub-component for Title
 const SignatureTitle = ({ onComplete }: { onComplete: () => void }) => (
   <motion.h1
     variants={titleVariants}

@@ -34,7 +34,7 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { Spinner } from "./ui/spinner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -73,11 +73,40 @@ interface ArenaChallengeCardProps {
   search: string;
 }
 
-const fetchChallenges = async (sort?: string, search?: string) => {
+const sanitizeInput = (input: string): string => {
+  return input.replace(/[<>'";&]/g, "").slice(0, 100);
+};
+
+const container: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const child: Variants = {
+  hidden: { opacity: 0, y: 30, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 260, damping: 25 },
+  },
+};
+
+const fetchChallenges = async (
+  sort?: string,
+  search?: string,
+  signal?: AbortSignal,
+) => {
   try {
     const params = new URLSearchParams();
-    if (sort) params.set("sort", sort);
-    if (search) params.set("search", search);
+    if (sort) params.set("sort", sanitizeInput(sort));
+    if (search) params.set("search", sanitizeInput(search));
     const queryString = params.toString();
     const url = queryString
       ? `/api/challenges?${queryString}`
@@ -86,35 +115,94 @@ const fetchChallenges = async (sort?: string, search?: string) => {
     const response = await fetch(url, {
       method: "GET",
       credentials: "include",
+      signal,
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
     const data = await response.json();
     if (!data)
-      return toast.error(
-        "Failed to fetch chall`enges, refresh and try again.",
-        {
-          position: "bottom-right",
-        },
-      );
+      toast.error("Failed to fetch challenges, refresh and try again.", {
+        position: "bottom-right",
+      });
     return data;
   } catch (err) {
-    console.log(err);
+    if (err instanceof Error && err.name === "AbortError") {
+      return null;
+    }
+    console.error(err);
+    toast.error("Network error. Please check your connection.", {
+      position: "bottom-right",
+    });
+    return null;
   }
 };
-const likeChallenge = async (challengeId: string) => {
+const likeChallenge = async (
+  challengeId: string,
+  signal?: AbortSignal,
+): Promise<{ success?: boolean; error?: string } | null> => {
   try {
-    const response = await fetch(`/api/challenges/like/${challengeId}`, {
+    const response = await fetch(`/api/challenges/like/${encodeURIComponent(challengeId)}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
+      signal,
     });
-    const data = await response.json();
 
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
     return data;
   } catch (err) {
-    return toast.warning("504 Internal Server Error.", {
+    if (err instanceof Error && err.name === "AbortError") {
+      return null;
+    }
+    console.error(err);
+    toast.warning("Action failed. Please try again.", {
       position: "bottom-right",
     });
+    return { error: "Network error" };
+  }
+};
+const voteChallenge = async (
+  challengeId: string,
+  itemId: string,
+  signal?: AbortSignal,
+) => {
+  try {
+    const sanitizedChallengeId = encodeURIComponent(challengeId);
+    const sanitizedItemId = encodeURIComponent(itemId);
+
+    const response = await fetch(`/api/items/${sanitizedChallengeId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      signal,
+      body: JSON.stringify({ itemId: sanitizedItemId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data)
+      toast.error("Your vote was not counted, refresh and try again");
+    return data;
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      return null;
+    }
+    console.error(err);
+    toast.error("Vote failed. Please check your connection.", {
+      position: "bottom-right",
+    });
+    return { error: "Network error" };
   }
 };
 const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
@@ -124,14 +212,58 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
     null,
   );
   const [copied, setCopied] = useState(false);
-  const handleCopy = (challengeId: string) => {
-    const shareUrl = `${window.location.origin}/arena/${challengeId}`;
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const isMountedRef = useRef(true);
+  const windowOriginRef = useRef<string>("");
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const loadChallenges = async () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+      
+      setIsFetchingChallenges(true);
+      const data = await fetchChallenges(sort, search, abortControllerRef.current.signal);
+      if (isMountedRef.current && data) {
+        setChallenges(data);
+        setIsFetchingChallenges(false);
+      }
+    };
+    loadChallenges();
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [sort, search]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      windowOriginRef.current = window.location.origin;
+    }
+  }, []);
+
+  const router = useRouter();
+
+  const handleCopy = useCallback((challengeId: string) => {
+    if (!windowOriginRef.current) return;
+    const shareUrl = `${windowOriginRef.current}/arena/${encodeURIComponent(challengeId)}`;
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     toast.success("Link copied!");
     setTimeout(() => setCopied(false), 2000);
-  };
-  const handleLike = async (challengeId: string) => {
+  }, []);
+
+  const handleLike = useCallback(async (challengeId: string) => {
     const previousChallenges = [...challenges];
     setChallenges((prev) =>
       prev.map((c) => {
@@ -152,22 +284,19 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
       setChallenges(previousChallenges);
       toast.error("Action failed. Please try again.");
     }
-  };
-  const voteChallenge = async (challengeId: string, itemId: string) => {
-    const response = await fetch(`/api/items/${challengeId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ itemId }),
-    });
-    const data = await response.json();
+  }, [challenges]);
 
-    if (!data)
-      return toast.error("Your vote was not counted, refresh and try again");
-    return data;
-  };
-  const handleVote = async (challengeId: string, itemId: string) => {
+  const handleVote = useCallback(async (challengeId: string, itemId: string) => {
     if (votingChallengeId) return;
+
+    const challenge = challenges.find((c) => c.id === challengeId);
+    if (!challenge) return;
+    
+    const validItemIds = challenge.items.map((item) => item.itemId);
+    if (!validItemIds.includes(itemId)) {
+      toast.error("Invalid item selection.");
+      return;
+    }
 
     setVotingChallengeId(challengeId);
     const result = await voteChallenge(challengeId, itemId);
@@ -228,39 +357,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
         };
       }),
     );
-  };
-  useEffect(() => {
-    const loadChallenges = async () => {
-      setIsFetchingChallenges(true);
-      const data = await fetchChallenges(sort, search);
-      if (data) {
-        setChallenges(data);
-        setIsFetchingChallenges(false);
-      }
-    };
-    loadChallenges();
-  }, [sort, search]);
-  const router = useRouter();
-  const container: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const child: Variants = {
-    hidden: { opacity: 0, y: 30, scale: 0.98 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { type: "spring", stiffness: 260, damping: 25 },
-    },
-  };
+  }, [votingChallengeId, challenges]);
   return (
     <div>
       <div>
@@ -272,7 +369,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
           className="w-full flex flex-col gap-8"
         >
           {isFetchingChallenges ? (
-            <div className="bg-background flex items-center justify-center min-h-screen">
+            <div className="bg-background flex items-center justify-center min-h-[300px]">
               <Spinner className="size-8" />
             </div>
           ) : (
@@ -331,7 +428,8 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                               }
                               alt="Event cover"
                               fill
-                              sizes="100px"
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                              priority={c.items[0].item.imageUrl ? true : false}
                               className={`relative z-20 w-full object-cover brightness-100  
                         transition-all duration-500 group-hover:brightness-60 
                         ${c.userVotedItemId && c.stats?.item1Percent < c.stats?.item2Percent ? "birightness-40" : ""}`}
@@ -376,7 +474,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                               }
                               alt="Event cover"
                               fill
-                              sizes="100px"
+                              sizes="(max-width: 768px) 100vw, 50vw"
                               className={`relative z-20 w-full object-cover brightness-100  
                          transition-all duration-500 group-hover:brightness-60 
                         ${c.userVotedItemId && c.stats?.item2Percent < c.stats?.item1Percent ? "birightness-40" : ""}`}
@@ -439,7 +537,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                                   <Input
                                     id="link"
                                     className="h-9 bg-muted/50 font-mono text-xs"
-                                    value={`${typeof window !== "undefined" ? window.location.origin : ""}/arena/${c.id}`}
+                                    value={`${typeof window !== "undefined" ? window.location.origin : ""}/arena/${encodeURIComponent(c.id)}`}
                                     readOnly
                                   />
                                 </div>
