@@ -281,3 +281,23 @@ export const likeChallenge = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+export const deleteChallenge = async (req: Request, res: Response) => {
+  try {
+    const { challengeId } = req.params as { challengeId: string };
+    const user = req.user;
+
+    if (!user?.id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    if (!challengeId) {
+      return res.status(400).json({ error: "Challenge ID is required" });
+    }
+    const deletedChallenge = await prisma.challenge.delete({
+      where: { id: challengeId, userId: user?.id },
+    });
+    res.status(203).json({ message: "Challenge deleted successfuly" });
+  } catch (err) {
+    res.status(401).json({ error: "Failed to delete the challenge" });
+  }
+};

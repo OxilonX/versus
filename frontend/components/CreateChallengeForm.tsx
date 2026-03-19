@@ -72,7 +72,7 @@ const CreateChallengeForm = () => {
       </div>
       <motion.div
         initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0, transition: { duration: 0.5 } }}
+        animate={{ opacity: 1, y: 0, transition: { duration: 0.25 } }}
         className="flex flex-col gap-4 bg-card-offset px-6 py-8 rounded-lg shadow-md"
       >
         <div>

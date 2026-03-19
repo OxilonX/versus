@@ -37,7 +37,7 @@ export const ImageMotion = ({ url, alt }: { url: string; alt: string }) => {
       whileInView={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, y: 40 }}
       viewport={{ once: false, amount: 0.3 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
       drag
       dragConstraints={{ top: -50, left: -200, right: 0, bottom: 0 }}
       dragSnapToOrigin
@@ -107,7 +107,7 @@ export const StarMotion = () => {
       opacity: 1,
       x: 0,
       transition: {
-        duration: 0.3,
+        duration: 0.15,
       },
     },
   };
@@ -228,7 +228,7 @@ export const HeroParMotion = ({ paragraph }: { paragraph: string }) => {
       y: 0,
       transition: {
         staggerChildren: 0.4,
-        duration: 0.5,
+        duration: 0.25,
       },
     },
   };

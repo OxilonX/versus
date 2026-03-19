@@ -98,7 +98,11 @@ export const voteItemChallenge = async (req: Request, res: Response) => {
           challengeId,
         },
       },
-      update: { itemId, challengeItemChallengeId: challengeId, challengeItemItemId: itemId },
+      update: {
+        itemId,
+        challengeItemChallengeId: challengeId,
+        challengeItemItemId: itemId,
+      },
       create: {
         userId: user.id,
         challengeId,
@@ -116,5 +120,25 @@ export const voteItemChallenge = async (req: Request, res: Response) => {
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const deleteItem = async (req: Request, res: Response) => {
+  try {
+    const { itemId } = req.params as { itemId: string };
+    const user = req.user;
+
+    if (!user?.id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    if (itemId) {
+      return res.status(400).json({ error: "Item ID is required" });
+    }
+    const deletedItem = await prisma.item.delete({
+      where: { id: itemId, userId: user?.id },
+    });
+    res.status(203).json({ message: "Item deleted successfuly" });
+  } catch (err) {
+    res.status(401).json({ error: "Failed to delete the item" });
   }
 };

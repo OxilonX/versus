@@ -1,17 +1,23 @@
 "use client";
+Copy;
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Grid3X3,
-  Bookmark,
-
-  Share,
-  Check,
-  Copy,
-} from "lucide-react";
+import { X } from "lucide-react";
+import { Grid3X3, Bookmark, Share, Check, Copy } from "lucide-react";
 import { UserProfileData, ProfileChallenge } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
@@ -38,7 +44,119 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function ChallengeGridItem({ challenge }: { challenge: ProfileChallenge }) {
+function ChallengeGridItem({
+  challenge,
+  setChallenges,
+  isOwn,
+}: {
+  challenge: ProfileChallenge;
+  setChallenges: React.Dispatch<React.SetStateAction<ProfileChallenge[]>>;
+  isOwn: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const deleteChallengeReq = async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:4000"}/api/challenges/${challenge.id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        throw new Error("Failed to Delete Challenge");
+      }
+      const data = await response.json();
+      return data;
+    };
+    toast.promise(deleteChallengeReq(), {
+      closeButton: false,
+      loading: "Deleting Challenge...",
+      success: () => {
+        setChallenges((prev) => prev.filter((c) => c.id !== challenge.id));
+        return ` Challenge is deleted successfuly!`;
+      },
+
+      error: (err) => err.message,
+    });
+  };
+  return (
+    <Link
+      href={`/arena/${challenge.id}`}
+      className="group relative aspect-square overflow-hidden bg-muted"
+    >
+      <Image
+        src={challenge.items[0]?.item.imageUrl || "/placeholder.png"}
+        alt={challenge.title}
+        fill
+        className="object-cover transition-transform duration-500 group-hover:scale-110"
+      />
+      {isOwn ? (
+        <AlertDialog open={open} onOpenChange={setOpen}>
+          <AlertDialogTrigger asChild>
+            <div
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOpen(true);
+              }}
+              className="hidden group-hover:flex absolute items-start justify-end w-full pr-2 pt-2 z-20"
+            >
+              <X
+                size={30}
+                className="stroke-destructive hover:stroke-red-400 transition-colors duration-300 cursor-pointer"
+              />
+            </div>
+          </AlertDialogTrigger>
+          <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      ) : null}
+
+      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 text-white font-bold z-10">
+        <div>
+          <h1 className="text-2xl">{challenge.title}</h1>
+        </div>
+        <div className="flex items-center gap-1  text-muted dark:text-gray-300">
+          <span className="text-sm">{challenge.stats.totalVotes}</span>
+          <span className="text-xs uppercase tracking-tighter">Votes</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+const VotedChallengeGridItem = ({
+  challenge,
+}: {
+  challenge: ProfileChallenge;
+}) => {
+  console.log("from voted", challenge);
+
+  if (!challenge)
+    return (
+      <div>
+        <h1>You didn't vote yet</h1>
+      </div>
+    );
   return (
     <Link
       href={`/arena/${challenge.id}`}
@@ -51,7 +169,7 @@ function ChallengeGridItem({ challenge }: { challenge: ProfileChallenge }) {
         className="object-cover transition-transform duration-500 group-hover:scale-110"
       />
 
-      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 text-white font-bold">
+      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 text-white font-bold z-10">
         <div>
           <h1 className="text-2xl">{challenge.title}</h1>
         </div>
@@ -62,7 +180,7 @@ function ChallengeGridItem({ challenge }: { challenge: ProfileChallenge }) {
       </div>
     </Link>
   );
-}
+};
 
 export default function ProfileContent({
   profile,
@@ -72,7 +190,9 @@ export default function ProfileContent({
   isOwn: boolean;
 }) {
   const [copied, setCopied] = useState(false);
+  console.log(profile);
 
+  const [challenges, setChallenges] = useState(profile.createdChallenges);
   const handleShareProfile = () => {
     const shareUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/profile/${profile.user.id}`;
 
@@ -177,7 +297,7 @@ export default function ProfileContent({
           </div>
 
           <div className=" flex items-center gap-10">
-            <Stat label="challenges" value={profile.stats.challengesCount} />
+            <Stat label="challenges" value={challenges.length} />
             <Stat label="likes" value={profile.stats.likesCount} />
             <Stat label="votes" value={profile.stats.votesCount} />
           </div>
@@ -195,7 +315,7 @@ export default function ProfileContent({
       {/* --- MOBILE STATS --- */}
       <div className="hidden">
         <div className="flex gap-4  border-t py-3 justify-around border-border ">
-          <Stat label="challenges" value={profile.stats.challengesCount} />
+          <Stat label="challenges" value={challenges.length} />
           <Stat label="likes" value={profile.stats.likesCount} />
           <Stat label="votes" value={profile.stats.votesCount} />
         </div>
@@ -222,8 +342,13 @@ export default function ProfileContent({
 
         <TabsContent value="created" className="mt-1">
           <div className="grid grid-cols-3 gap-1 md:gap-7">
-            {profile.createdChallenges.map((challenge) => (
-              <ChallengeGridItem key={challenge.id} challenge={challenge} />
+            {challenges.map((challenge) => (
+              <ChallengeGridItem
+                key={challenge.id}
+                challenge={challenge}
+                setChallenges={setChallenges}
+                isOwn={isOwn}
+              />
             ))}
           </div>
         </TabsContent>
@@ -231,7 +356,10 @@ export default function ProfileContent({
         <TabsContent value="voted" className="mt-1">
           <div className="grid grid-cols-3 gap-1 md:gap-7">
             {profile.votedChallenges.map((challenge) => (
-              <ChallengeGridItem key={challenge.id} challenge={challenge} />
+              <VotedChallengeGridItem
+                key={challenge.id}
+                challenge={challenge}
+              />
             ))}
           </div>
         </TabsContent>

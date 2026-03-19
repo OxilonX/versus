@@ -25,11 +25,12 @@ import { Label } from "@/components/ui/label";
 //next imports
 import Image from "next/image";
 //lucide icons imports
+import { ShareFatIcon, BookmarkSimpleIcon } from "@phosphor-icons/react";
+
 import {
   Ellipsis,
   TriangleAlert,
   Heart,
-  Share,
   Bookmark,
   Copy,
   Check,
@@ -139,33 +140,28 @@ const fetchChallenges = async (
     return null;
   }
 };
-const likeChallenge = async (
-  challengeId: string,
-  signal?: AbortSignal,
-): Promise<{ success?: boolean; error?: string } | null> => {
+const likeChallenge = async (challengeId: string, signal?: AbortSignal) => {
   try {
-    const response = await fetch(`/api/challenges/like/${encodeURIComponent(challengeId)}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      signal,
-    });
+    const response = await fetch(
+      `/api/challenges/like/${encodeURIComponent(challengeId)}`,
+      {
+        method: "POST",
+        credentials: "include",
+        signal,
+      },
+    );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    // 1. CAPTURE THE 401 STATUS
+    if (response.status === 401) {
+      return { error: "Unauthorized" };
     }
 
-    const data = await response.json();
-    return data;
+    if (!response.ok) throw new Error("Failed");
+
+    return await response.json();
   } catch (err) {
-    if (err instanceof Error && err.name === "AbortError") {
-      return null;
-    }
-    console.error(err);
-    toast.warning("Action failed. Please try again.", {
-      position: "bottom-right",
-    });
-    return { error: "Network error" };
+    if (err instanceof Error && err.name === "AbortError") return null;
+    return { error: (err as Error).message };
   }
 };
 const voteChallenge = async (
@@ -174,35 +170,32 @@ const voteChallenge = async (
   signal?: AbortSignal,
 ) => {
   try {
-    const sanitizedChallengeId = encodeURIComponent(challengeId);
-    const sanitizedItemId = encodeURIComponent(itemId);
+    const response = await fetch(
+      `/api/items/${encodeURIComponent(challengeId)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        signal,
+        body: JSON.stringify({ itemId: encodeURIComponent(itemId) }),
+      },
+    );
 
-    const response = await fetch(`/api/items/${sanitizedChallengeId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      signal,
-      body: JSON.stringify({ itemId: sanitizedItemId }),
-    });
+    // 1. Handle 401 explicitly before the .ok check
+    if (response.status === 401) {
+      return { error: "Unauthorized" };
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
-
-    if (!data)
-      toast.error("Your vote was not counted, refresh and try again");
-    return data;
+    return await response.json();
   } catch (err) {
-    if (err instanceof Error && err.name === "AbortError") {
-      return null;
-    }
-    console.error(err);
-    toast.error("Vote failed. Please check your connection.", {
-      position: "bottom-right",
-    });
-    return { error: "Network error" };
+    if (err instanceof Error && err.name === "AbortError") return null;
+
+    // 2. Return the actual error message or a specific code
+    return { error: err instanceof Error ? err.message : "Network error" };
   }
 };
 const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
@@ -229,9 +222,13 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
         abortControllerRef.current.abort();
       }
       abortControllerRef.current = new AbortController();
-      
+
       setIsFetchingChallenges(true);
-      const data = await fetchChallenges(sort, search, abortControllerRef.current.signal);
+      const data = await fetchChallenges(
+        sort,
+        search,
+        abortControllerRef.current.signal,
+      );
       if (isMountedRef.current && data) {
         setChallenges(data);
         setIsFetchingChallenges(false);
@@ -263,101 +260,126 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
     setTimeout(() => setCopied(false), 2000);
   }, []);
 
-  const handleLike = useCallback(async (challengeId: string) => {
-    const previousChallenges = [...challenges];
-    setChallenges((prev) =>
-      prev.map((c) => {
-        if (c.id === challengeId) {
+  const handleLike = useCallback(
+    async (challengeId: string) => {
+      const previousChallenges = [...challenges];
+
+      setChallenges((prev) =>
+        prev.map((c) =>
+          c.id === challengeId
+            ? {
+                ...c,
+                isLiked: !c.isLiked,
+                likesCount: c.isLiked ? c.likesCount - 1 : c.likesCount + 1,
+              }
+            : c,
+        ),
+      );
+      const result = await likeChallenge(challengeId);
+
+      if (result?.error) {
+        setChallenges(previousChallenges);
+
+        if (
+          result.error.includes("401") ||
+          result.error.includes("Unauthorized")
+        ) {
+          toast.error("You need to be signed in to like!");
+          router.push("/login");
+          return;
+        }
+
+        toast.error("Action failed. Please try again.");
+      }
+    },
+    [challenges, router],
+  );
+  const handleVote = useCallback(
+    async (challengeId: string, itemId: string) => {
+      if (votingChallengeId) return;
+
+      const challenge = challenges.find((c) => c.id === challengeId);
+      if (!challenge) return;
+
+      const validItemIds = challenge.items.map((item) => item.itemId);
+      if (!validItemIds.includes(itemId)) {
+        toast.error("Invalid item selection.");
+        return;
+      }
+
+      setVotingChallengeId(challengeId);
+      const result = await voteChallenge(challengeId, itemId);
+      setVotingChallengeId(null);
+      if (
+        result?.error === "Unauthorized" ||
+        result?.error?.includes("Unauthorized")
+      ) {
+        toast.error("Please login to vote");
+        router.push("/login");
+        return;
+      }
+      if (!result || result.error) {
+        toast.error("Sync failed. Check your connection.");
+        return;
+      }
+
+      setChallenges((prev) =>
+        prev.map((c) => {
+          if (c.id !== challengeId) return c;
+
+          const previousVotedItemId = c.userVotedItemId;
+          const isRemovingVote = result.status === "neutral";
+          const isNewVote = result.status === "voted" && !previousVotedItemId;
+          const isSwitchingVote =
+            result.status === "voted" &&
+            previousVotedItemId &&
+            previousVotedItemId !== itemId;
+
+          const updatedItems = c.items.map((item) => {
+            let newVotes = item._count.votes;
+            if (isRemovingVote) {
+              if (item.itemId === previousVotedItemId) {
+                newVotes = Math.max(0, newVotes - 1);
+              }
+            } else if (isNewVote) {
+              if (item.itemId === itemId) {
+                newVotes = newVotes + 1;
+              }
+            } else if (isSwitchingVote) {
+              if (item.itemId === itemId) {
+                newVotes = newVotes + 1;
+              } else if (item.itemId === previousVotedItemId) {
+                newVotes = Math.max(0, newVotes - 1);
+              }
+            }
+            return { ...item, _count: { votes: newVotes } };
+          });
+
+          const item1Votes = updatedItems[0]._count.votes;
+          const item2Votes = updatedItems[1]._count.votes;
+          const totalVotes = item1Votes + item2Votes;
+
           return {
             ...c,
-            isLiked: !c.isLiked,
-            likesCount: c.isLiked ? c.likesCount - 1 : c.likesCount + 1,
+            items: updatedItems,
+            userVotedItemId: isRemovingVote ? null : itemId,
+            stats: {
+              item1Percent:
+                totalVotes > 0
+                  ? Math.round((item1Votes / totalVotes) * 100)
+                  : 0,
+              item2Percent:
+                totalVotes > 0
+                  ? Math.round((item2Votes / totalVotes) * 100)
+                  : 0,
+              totalVotes,
+            },
           };
-        }
-        return c;
-      }),
-    );
-
-    const result = await likeChallenge(challengeId);
-
-    if (!result || result.error) {
-      setChallenges(previousChallenges);
-      toast.error("Action failed. Please try again.");
-    }
-  }, [challenges]);
-
-  const handleVote = useCallback(async (challengeId: string, itemId: string) => {
-    if (votingChallengeId) return;
-
-    const challenge = challenges.find((c) => c.id === challengeId);
-    if (!challenge) return;
-    
-    const validItemIds = challenge.items.map((item) => item.itemId);
-    if (!validItemIds.includes(itemId)) {
-      toast.error("Invalid item selection.");
-      return;
-    }
-
-    setVotingChallengeId(challengeId);
-    const result = await voteChallenge(challengeId, itemId);
-    setVotingChallengeId(null);
-
-    if (!result || result.error) {
-      toast.error("Sync failed. Check your connection.");
-      return;
-    }
-
-    setChallenges((prev) =>
-      prev.map((c) => {
-        if (c.id !== challengeId) return c;
-
-        const previousVotedItemId = c.userVotedItemId;
-        const isRemovingVote = result.status === "neutral";
-        const isNewVote = result.status === "voted" && !previousVotedItemId;
-        const isSwitchingVote =
-          result.status === "voted" &&
-          previousVotedItemId &&
-          previousVotedItemId !== itemId;
-
-        const updatedItems = c.items.map((item) => {
-          let newVotes = item._count.votes;
-          if (isRemovingVote) {
-            if (item.itemId === previousVotedItemId) {
-              newVotes = Math.max(0, newVotes - 1);
-            }
-          } else if (isNewVote) {
-            if (item.itemId === itemId) {
-              newVotes = newVotes + 1;
-            }
-          } else if (isSwitchingVote) {
-            if (item.itemId === itemId) {
-              newVotes = newVotes + 1;
-            } else if (item.itemId === previousVotedItemId) {
-              newVotes = Math.max(0, newVotes - 1);
-            }
-          }
-          return { ...item, _count: { votes: newVotes } };
-        });
-
-        const item1Votes = updatedItems[0]._count.votes;
-        const item2Votes = updatedItems[1]._count.votes;
-        const totalVotes = item1Votes + item2Votes;
-
-        return {
-          ...c,
-          items: updatedItems,
-          userVotedItemId: isRemovingVote ? null : itemId,
-          stats: {
-            item1Percent:
-              totalVotes > 0 ? Math.round((item1Votes / totalVotes) * 100) : 0,
-            item2Percent:
-              totalVotes > 0 ? Math.round((item2Votes / totalVotes) * 100) : 0,
-            totalVotes,
-          },
-        };
-      }),
-    );
-  }, [votingChallengeId, challenges]);
+        }),
+      );
+    },
+    [votingChallengeId, challenges],
+  );
   return (
     <div>
       <div>
@@ -380,12 +402,13 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Avatar
-                          className="cursor-pointer"
+                          className="cursor-pointer group"
                           onClick={() => {
                             router.push(`/profile/${c.userId}`);
                           }}
                         >
                           <AvatarImage
+                            className="group-hover:scale-110 transition-scale duration-300"
                             src={
                               c?.user?.image || "https://github.com/shadcn.png"
                             }
@@ -393,7 +416,10 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                           />
                           <AvatarFallback>CN</AvatarFallback>
                         </Avatar>
-                        <h1>{c.user?.name}</h1>
+                        <h1 className="relative w-fit text-base font-medium cursor-pointer group">
+                          {c?.user?.name}
+                          <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-foreground transition-all duration-300 group-hover:w-full"></span>
+                        </h1>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -464,7 +490,6 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                         onClick={() => handleVote(c.id, c.items[1].itemId)}
                         className={`relative ml-auto z-5 w-full pt-0 group cursor-pointer ${votingChallengeId === c.id ? "opacity-50 pointer-events-none" : ""}`}
                       >
-                        <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
                         {c.items[1].item.imageUrl ? (
                           <div className="w-full h-full">
                             <Image
@@ -518,11 +543,14 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                           />
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Share className="stroke-2 cursor-pointer" />
+                              <ShareFatIcon
+                                size={26}
+                                className="stroke-2 cursor-pointer"
+                              />
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-md">
                               <DialogHeader>
-                                <DialogTitle>Share challenge link</DialogTitle>
+                                <DialogTitle>share challenge link</DialogTitle>
                                 <DialogDescription>
                                   Anyone who has this link will be able to view
                                   this challenge and interact with it if logged
@@ -563,7 +591,10 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                             </DialogContent>
                           </Dialog>
                         </div>
-                        <Bookmark className="stroke-2 cursor-pointer" />
+                        <BookmarkSimpleIcon
+                          size={26}
+                          className="stroke-2 cursor-pointer"
+                        />
                       </div>
                       <div className="pt-1 flex items-center text-muted-foreground font-medium text-xs">
                         {c.likesCount} likes

@@ -403,12 +403,12 @@ const CreateChallengeItem = memo(
               <div className="flex justify-between items-center">
                 <motion.div
                   initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1, transition: { duration: 0.3 } }}
+                  whileInView={{ opacity: 1, transition: { duration: 0.15 } }}
                   className="flex items-center justify-between gap-8 py-2"
                 >
                   <motion.div
                     initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1, transition: { duration: 0.3 } }}
+                    whileInView={{ opacity: 1, transition: { duration: 0.15 } }}
                   >
                     <Label
                       htmlFor="public-toggle"
@@ -419,7 +419,7 @@ const CreateChallengeItem = memo(
                   </motion.div>
                   <motion.div
                     initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1, transition: { duration: 0.5 } }}
+                    whileInView={{ opacity: 1, transition: { duration: 0.25 } }}
                   >
                     <Switch
                       className="cursor-pointer"
@@ -446,14 +446,14 @@ const CreateChallengeItem = memo(
               <div className="flex flex-col gap-4 pt-4">
                 <motion.h3
                   initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1, transition: { duration: 0.3 } }}
+                  whileInView={{ opacity: 1, transition: { duration: 0.15 } }}
                   className="text-2xl font-bold capitalize text-muted-foreground"
                 >
                   Item Preview
                 </motion.h3>
                 <motion.div
                   initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1, transition: { duration: 0.3 } }}
+                  whileInView={{ opacity: 1, transition: { duration: 0.15 } }}
                   className="flex items-start gap-10 w-full"
                 >
                   <div className="relative w-[150px] h-[150px] overflow-hidden rounded-md border border-border bg-muted shrink-0">

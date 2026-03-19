@@ -90,6 +90,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   if (!profile) {
     notFound();
   }
+  // console.log(profile);
 
   const _isOwnProfile = session?.user?.id === userId;
 

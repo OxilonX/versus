@@ -23,7 +23,7 @@ const titleVariants: Variants = {
 
 const wordVariants: Variants = {
   hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" } },
 };
 
 const SignatureTitle = ({ onComplete }: { onComplete: () => void }) => (
@@ -84,7 +84,7 @@ const Signature = () => {
     <div className="flex flex-col gap-10">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
-        whileInView={{ opacity: 1, y: 0, transition: { duration: 1 } }}
+        whileInView={{ opacity: 1, y: 0, transition: { duration: 0.25 } }}
         viewport={{ once: true }}
         className="flex items-center"
       >

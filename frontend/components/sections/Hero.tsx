@@ -34,7 +34,7 @@ const Hero = () => {
                   Explore Versus for free
                 </Button>
               </MotionLink>
-              <MotionLink href="/arena">
+              <MotionLink href="/create">
                 <Button variant={"outline"} className="px-8 py-6 w-fit mt-1">
                   How it works
                 </Button>
