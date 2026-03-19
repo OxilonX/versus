@@ -21,6 +21,7 @@ model User {
   challenge Challenge[]
   like      Like[]
   votes     Vote[]
+  reports   Report[]
 
   @@map("user")
 }
@@ -96,6 +97,7 @@ model Challenge {
   like      Like[]
   createdAt DateTime        @default(now())
   votes     Vote[]
+  reports   Report[]
 
   @@map("challenge")
 }
@@ -150,4 +152,17 @@ model Vote {
 
   @@unique([userId, challengeId])
   @@map("votes")
+}
+
+model Report {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  userId      String
+  challengeId String
+  reason      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([id])
+  @@map("report")
 }

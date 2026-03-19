@@ -34,7 +34,6 @@ export const createChallenge = async (req: Request, res: Response) => {
 
     res.status(201).json(challenge);
   } catch (error: any) {
-    console.error("Prisma Error:", error);
     if (error.code === "P2025") {
       return res.status(404).json({ error: "One or more Item IDs not found" });
     }
@@ -299,5 +298,26 @@ export const deleteChallenge = async (req: Request, res: Response) => {
     res.status(203).json({ message: "Challenge deleted successfuly" });
   } catch (err) {
     res.status(401).json({ error: "Failed to delete the challenge" });
+  }
+};
+export const reportChallenge = async (req: Request, res: Response) => {
+  try {
+    const challengeId = req.params?.challengeId as string;
+    const { reason } = req.body;
+    const user = req.user;
+
+    if (!user?.id) return res.status(401).json({ error: "User ID missing" });
+    if (!reason) return res.status(400).json({ error: "Reason is required" });
+    const report = await prisma.report.create({
+      data: {
+        reason,
+        user: { connect: { id: user.id } },
+        challenge: { connect: { id: challengeId } },
+      },
+    });
+    if (report)
+      res.status(201).json({ message: "the report is sent successfuly" });
+  } catch (err) {
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

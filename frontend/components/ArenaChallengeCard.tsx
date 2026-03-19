@@ -26,16 +26,15 @@ import { Label } from "@/components/ui/label";
 import Image from "next/image";
 //lucide icons imports
 import { ShareFatIcon, BookmarkSimpleIcon } from "@phosphor-icons/react";
-
+import ReportDialog from "@/components/ArenaReportDialog";
+import { Ellipsis, Heart, Copy, Check } from "lucide-react";
 import {
-  Ellipsis,
-  TriangleAlert,
-  Heart,
-  Bookmark,
-  Copy,
-  Check,
-} from "lucide-react";
-import { useCallback, useEffect, useState, useRef } from "react";
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  JSXElementConstructor,
+} from "react";
 import { Spinner } from "./ui/spinner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -194,7 +193,6 @@ const voteChallenge = async (
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") return null;
 
-    // 2. Return the actual error message or a specific code
     return { error: err instanceof Error ? err.message : "Network error" };
   }
 };
@@ -208,7 +206,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const isMountedRef = useRef(true);
   const windowOriginRef = useRef<string>("");
-
+  const [reportOpen, setReportOpen] = useState(false);
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
@@ -380,6 +378,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
     },
     [votingChallengeId, challenges],
   );
+
   return (
     <div>
       <div>
@@ -429,9 +428,17 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                              <TriangleAlert />
-                              Report Challenge
+                            <DropdownMenuItem
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                setReportOpen(true);
+                              }}
+                            >
+                              <ReportDialog
+                                open={reportOpen}
+                                setReportOpen={setReportOpen}
+                                challengeId={c.id}
+                              />
                             </DropdownMenuItem>
                           </DropdownMenuGroup>
                         </DropdownMenuContent>
