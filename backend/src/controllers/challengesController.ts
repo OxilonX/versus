@@ -1,6 +1,12 @@
 import { prisma } from "../lib/prisma.js";
 import type { Request, Response } from "express";
-
+interface MappedChallenge {
+  save?: { userId: string }[];
+  like?: { userId: string }[];
+  votes?: { itemId: string }[];
+  items: any[];
+  _count: { like: number };
+}
 const isValidCuid = (str: string): boolean => {
   return /^c[a-z0-9]{24}$/.test(str);
 };
@@ -47,7 +53,6 @@ export const getChallenges = async (req: Request, res: Response) => {
     const { sort, search } = req.query;
 
     const isCuid = isValidCuid(search as string);
-    console.log("Search Query:", search, "Is CUID match:", isCuid);
 
     const whereClause = isCuid
       ? { id: search as string }
@@ -132,18 +137,23 @@ export const getChallenges = async (req: Request, res: Response) => {
           where: { userId: currentUserId },
           select: { itemId: true },
         },
+        save: {
+          where: { userId: currentUserId },
+          select: { userId: true },
+        },
       },
     });
-    const results = challenges.map((c) => {
+    const results = (challenges as unknown as MappedChallenge[]).map((c) => {
       const item1Votes = c.items[0]?._count.votes || 0;
       const item2Votes = c.items[1]?._count.votes || 0;
       const totalVotes = item1Votes + item2Votes;
 
       return {
         ...c,
-        isLiked: c.like.length > 0,
+        isLiked: (c.like?.length ?? 0) > 0,
+        isSaved: (c.save?.length ?? 0) > 0,
         likesCount: c._count.like,
-        userVotedItemId: c.votes[0]?.itemId || null,
+        userVotedItemId: c.votes?.[0]?.itemId || null,
         stats: {
           item1Percent:
             totalVotes > 0 ? Math.round((item1Votes / totalVotes) * 100) : 0,
@@ -319,5 +329,57 @@ export const reportChallenge = async (req: Request, res: Response) => {
       res.status(201).json({ message: "the report is sent successfuly" });
   } catch (err) {
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const saveChallenge = async (req: Request, res: Response) => {
+  try {
+    const challengeId = req.params?.challengeId as string;
+    const user = req.user;
+
+    if (!user?.id) return res.status(401).json({ error: "Unauthorized" });
+    if (!challengeId)
+      return res.status(400).json({ error: "Challenge ID is required" });
+
+    const existingSave = await prisma.save.findUnique({
+      where: {
+        userId_challengeId: {
+          userId: user.id,
+          challengeId: challengeId,
+        },
+      },
+    });
+
+    if (existingSave) {
+      const remove = await prisma.save.delete({
+        where: {
+          userId_challengeId: {
+            userId: user.id,
+            challengeId: challengeId,
+          },
+        },
+      });
+      return res.status(203).json({
+        message: "The Challenge is unsaved successfuly",
+        removedChallenge: remove,
+      });
+    }
+
+    const save = await prisma.save.create({
+      data: {
+        userId: user.id,
+        challengeId: challengeId,
+      },
+    });
+
+    return res.status(201).json({
+      message: "Challenge added to saves successfully",
+      save,
+    });
+  } catch (err: any) {
+    if (err.code === "P2025") {
+      return res.status(404).json({ error: "Challenge not found" });
+    }
+
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };

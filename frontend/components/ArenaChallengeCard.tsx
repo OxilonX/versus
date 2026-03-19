@@ -47,6 +47,7 @@ interface Challenge {
   userId: string;
   likesCount: number;
   isLiked: boolean;
+  isSaved?: boolean;
   userVotedItemId: string | null;
   createdAt: string;
   user: {
@@ -194,6 +195,27 @@ const voteChallenge = async (
     if (err instanceof Error && err.name === "AbortError") return null;
 
     return { error: err instanceof Error ? err.message : "Network error" };
+  }
+};
+const saveChallenge = async (challengeId: string) => {
+  try {
+    const response = await fetch(
+      `/api/challenges/${encodeURIComponent(challengeId)}/save`,
+      {
+        method: "POST",
+        credentials: "include",
+      },
+    );
+
+    if (response.status === 401) return { error: "Unauthorized" };
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return { error: errorData.error || "Failed" };
+    }
+
+    return await response.json();
+  } catch (err) {
+    return { error: "Network error" };
   }
 };
 const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
@@ -378,7 +400,36 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
     },
     [votingChallengeId, challenges],
   );
+  const handleSave = useCallback(
+    async (challengeId: string) => {
+      const savePromise = async () => {
+        const result = await saveChallenge(challengeId);
 
+        if (result?.error) {
+          if (result.error === "Unauthorized") {
+            router.push("/login");
+            throw new Error("Please login to save challenges");
+          }
+          throw new Error(result.error);
+        }
+        return result;
+      };
+
+      toast.promise(savePromise(), {
+        loading: "Saving...",
+        success: () => {
+          setChallenges((prev) =>
+            prev.map((c) =>
+              c.id === challengeId ? { ...c, isSaved: true } : c,
+            ),
+          );
+          return "Added to your saves.";
+        },
+        error: (err) => err.message,
+      });
+    },
+    [router],
+  );
   return (
     <div>
       <div>
@@ -415,7 +466,12 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                           />
                           <AvatarFallback>CN</AvatarFallback>
                         </Avatar>
-                        <h1 className="relative w-fit text-base font-medium cursor-pointer group">
+                        <h1
+                          onClick={() => {
+                            router.push(`/profile/${c.userId}`);
+                          }}
+                          className="relative w-fit text-base font-medium cursor-pointer group"
+                        >
                           {c?.user?.name}
                           <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-foreground transition-all duration-300 group-hover:w-full"></span>
                         </h1>
@@ -600,6 +656,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                         </div>
                         <BookmarkSimpleIcon
                           size={26}
+                          onClick={() => handleSave(c?.id)}
                           className="stroke-2 cursor-pointer"
                         />
                       </div>
