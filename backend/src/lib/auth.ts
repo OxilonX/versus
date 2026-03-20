@@ -44,8 +44,20 @@ export const auth = betterAuth({
     crossSiteCookies: {
       enabled: true,
     },
+    onRequest: (request: { method: string; url: string; headers: Headers }) => {
+      const forwardedProto = request.headers.get("x-forwarded-proto");
+      const forwardedHost = request.headers.get("x-forwarded-host");
+      console.log(`[AUTH_REQUEST] ${request.method} ${request.url}`);
+      console.log(`[AUTH_REQUEST] x-forwarded-proto: ${forwardedProto}`);
+      console.log(`[AUTH_REQUEST] x-forwarded-host: ${forwardedHost}`);
+      console.log(`[AUTH_REQUEST] Headers:`, JSON.stringify(Object.fromEntries(request.headers)));
+    },
     onAPIError: {
-      errorURL: "https://versus-blond.vercel.app/auth-error",
+      throw: true,
+      errorURL: "https://versus-blond.vercel.app/login?error=auth_failed",
+      onError: ({ url, error }: { url: string; error: Error }) => {
+        console.error(`[AUTH_ERROR] Path: ${url} | Error:`, error);
+      },
     },
   },
 });

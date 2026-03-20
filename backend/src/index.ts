@@ -3,7 +3,6 @@ import express from "express";
 import cors from "cors";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
-//routes imports
 import challengesRouter from "./routes/challengesRoute.js";
 import usersRouter from "./routes/usersRoute.js";
 import itemsRouter from "./routes/itemsRoute.js";
@@ -12,6 +11,15 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.set("trust proxy", 1);
+
+app.use((req, _res, next) => {
+  console.log(`[EXPRESS] ${req.method} ${req.url}`);
+  console.log(`[EXPRESS] x-forwarded-proto: ${req.headers["x-forwarded-proto"]}`);
+  console.log(`[EXPRESS] x-forwarded-host: ${req.headers["x-forwarded-host"]}`);
+  console.log(`[EXPRESS] host: ${req.headers.host}`);
+  console.log(`[EXPRESS] origin: ${req.headers.origin}`);
+  next();
+});
 
 const allowedOrigins = [
   "http://localhost:3000",
