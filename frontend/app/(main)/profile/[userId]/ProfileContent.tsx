@@ -187,15 +187,18 @@ export default function ProfileContent({
   profile: UserProfileData | null;
   isOwn: boolean;
 }) {
+  console.log("[ProfileContent] Props - profile:", profile, "isOwn:", isOwn);
+  console.log("[ProfileContent] API_BASE:", process.env.NEXT_PUBLIC_API_URL);
+  
   if (!profile || !profile.user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Loading profile...</p>
+        <p>Loading profile... (profile is null)</p>
       </div>
     );
   }
   const [copied, setCopied] = useState(false);
-  console.log(profile);
+  console.log("[ProfileContent] profile:", profile);
 
   const [challenges, setChallenges] = useState(profile.createdChallenges);
   const handleShareProfile = () => {
