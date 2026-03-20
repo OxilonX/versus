@@ -7,8 +7,14 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 async function createPrismaClient() {
+  let connectionString = process.env.DATABASE_URL || "";
+  
+  if (connectionString.includes("channel_binding=require")) {
+    connectionString = connectionString.replace("channel_binding=require&", "").replace("&channel_binding=require", "").replace("channel_binding=require", "");
+  }
+  
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString,
     ssl: {
       rejectUnauthorized: false,
     },
