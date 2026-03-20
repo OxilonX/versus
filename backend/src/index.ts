@@ -11,9 +11,17 @@ import itemsRouter from "./routes/itemsRoute.js";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+app.set("trust proxy", 1);
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://versus-blond.vercel.app",
+  "https://versus-liard.vercel.app",
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: allowedOrigins,
     credentials: true,
   }),
 );

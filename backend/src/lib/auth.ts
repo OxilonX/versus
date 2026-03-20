@@ -40,8 +40,12 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   advanced: {
     useSecureCookies: true,
+    cookiePrefix: "versus",
     crossSiteCookies: {
       enabled: true,
+    },
+    onAPIError: {
+      errorURL: "https://versus-blond.vercel.app/auth-error",
     },
   },
 });
