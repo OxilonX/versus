@@ -37,7 +37,7 @@ app.use(
 );
 
 console.log("Setting up auth handler...");
-app.all("/api/auth/*", toNodeHandler(auth));
+app.all("/api/auth/**", toNodeHandler(auth));
 
 app.use(express.json());
 
