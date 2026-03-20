@@ -13,8 +13,12 @@ const PORT = process.env.PORT || 4000;
 app.set("trust proxy", 1);
 
 app.use((req, _res, next) => {
-  console.log(`[DEBUG] ${req.method} ${req.url} | Cookies: ${req.headers.cookie}`);
-  console.log(`[DEBUG] x-forwarded-proto: ${req.headers["x-forwarded-proto"]} | x-forwarded-host: ${req.headers["x-forwarded-host"]}`);
+  console.log(`[ALL_REQUESTS] ${req.method} ${req.url} | Cookies: ${req.headers.cookie || "NONE"}`);
+  next();
+});
+
+app.use("/api/auth", (req, _res, next) => {
+  console.log(`[AUTH_ROUTE] ${req.method} ${req.url} | Cookies: ${req.headers.cookie || "NONE"}`);
   next();
 });
 
@@ -22,6 +26,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://versus-blond.vercel.app",
   "https://versus-liard.vercel.app",
+  "https://versus-2k2x6v2tg-oxilonxs-projects.vercel.app",
 ];
 
 app.use(
