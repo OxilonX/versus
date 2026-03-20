@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
@@ -12,32 +12,28 @@ const PORT = process.env.PORT || 4000;
 
 app.set("trust proxy", 1);
 
-app.use((req, _res, next) => {
-  console.log(`[ALL_REQUESTS] ${req.method} ${req.url} | Cookies: ${req.headers.cookie || "NONE"}`);
-  next();
+const authHandler = toNodeHandler(auth) as any;
+
+app.use("/api/auth/**", (req: Request, res: Response, next: NextFunction) => {
+  const originalSetHeader = res.setHeader.bind(res) as any;
+  res.setHeader = ((name: string, value: any) => {
+    if (name.toLowerCase() === "set-cookie") {
+      const cookieArr = Array.isArray(value) ? value.map(String) : [String(value)];
+      const modified = cookieArr.map((cookie) => {
+        if (!cookie.toLowerCase().includes("samesite=none")) {
+          if (/SameSite=/i.test(cookie)) {
+            return cookie.replace(/SameSite=[^;]+/i, "SameSite=None");
+          }
+          return cookie + "; SameSite=None";
+        }
+        return cookie;
+      });
+      return originalSetHeader(name, modified);
+    }
+    return originalSetHeader(name, value);
+  }) as any;
+  return authHandler(req, res, next);
 });
-
-app.use("/api/auth", (req, _res, next) => {
-  console.log(`[AUTH_ROUTE] ${req.method} ${req.url} | Cookies: ${req.headers.cookie || "NONE"}`);
-  next();
-});
-
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://versus-blond.vercel.app",
-  "https://versus-liard.vercel.app",
-  "https://versus-2k2x6v2tg-oxilonxs-projects.vercel.app",
-];
-
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  }),
-);
-
-console.log("Setting up auth handler...");
-app.all("/api/auth/**", toNodeHandler(auth));
 
 app.use(express.json());
 

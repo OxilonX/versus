@@ -40,9 +40,11 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   advanced: {
     useSecureCookies: true,
-    cookiePrefix: "versus",
     crossSiteCookies: {
       enabled: true,
+      attributes: {
+        sameSite: "none",
+      },
     },
     onRequest: (request: { method: string; url: string; headers: Headers }) => {
       const cookie = request.headers.get("cookie");
