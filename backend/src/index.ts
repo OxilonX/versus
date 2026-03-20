@@ -14,15 +14,12 @@ app.set("trust proxy", 1);
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://versus-blond.vercel.app",
-      "https://versus-liard.vercel.app",
-    ],
-    credentials: true,
+    origin: true, // This reflects the origin of the request back to the caller
+    credentials: true, // Crucial: This allows the browser to send cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
   }),
 );
-
 app.use(express.json());
 
 app.use("/api/auth", toNodeHandler(auth));
