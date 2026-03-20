@@ -14,24 +14,42 @@ app.set("trust proxy", 1);
 
 const authHandler = toNodeHandler(auth) as any;
 
-app.use("/api/auth/**", (req: Request, res: Response, next: NextFunction) => {
+function cookieInterceptor(res: Response) {
   const originalSetHeader = res.setHeader.bind(res) as any;
-  res.setHeader = ((name: string, value: any) => {
-    if (name.toLowerCase() === "set-cookie") {
-      const cookieArr = Array.isArray(value) ? value.map(String) : [String(value)];
-      const modified = cookieArr.map((cookie) => {
-        if (!cookie.toLowerCase().includes("samesite=none")) {
-          if (/SameSite=/i.test(cookie)) {
-            return cookie.replace(/SameSite=[^;]+/i, "SameSite=None");
-          }
-          return cookie + "; SameSite=None";
+  const originalAppend = res.append.bind(res) as any;
+  
+  const modifyCookies = (value: any) => {
+    const cookieArr = Array.isArray(value) ? value.map(String) : [String(value)];
+    return cookieArr.map((cookie) => {
+      if (!cookie.toLowerCase().includes("samesite=none")) {
+        if (/SameSite=/i.test(cookie)) {
+          return cookie.replace(/SameSite=[^;]+/i, "SameSite=None");
         }
-        return cookie;
-      });
-      return originalSetHeader(name, modified);
+        return cookie + "; SameSite=None";
+      }
+      return cookie;
+    });
+  };
+  
+  res.setHeader = ((name: string, value: any) => {
+    if (typeof name === "string" && name.toLowerCase() === "set-cookie") {
+      return originalSetHeader(name, modifyCookies(value));
     }
     return originalSetHeader(name, value);
   }) as any;
+  
+  res.append = ((name: string, value: any) => {
+    if (typeof name === "string" && name.toLowerCase() === "set-cookie") {
+      return originalAppend(name, modifyCookies(value));
+    }
+    return originalAppend(name, value);
+  }) as any;
+  
+  return res;
+}
+
+app.use("/api/auth/**", (req: Request, res: Response, next: NextFunction) => {
+  cookieInterceptor(res);
   return authHandler(req, res, next);
 });
 
