@@ -9,6 +9,7 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
@@ -36,6 +37,13 @@ export const auth = betterAuth({
     "http://localhost:4000",
   ],
   secret: process.env.BETTER_AUTH_SECRET,
+  advanced: {
+    useSecureCookies: true,
+    cookiePrefix: "better-auth",
+    crossSiteCookies: {
+      enabled: true,
+    },
+  },
 });
 
 export type Auth = typeof auth;
