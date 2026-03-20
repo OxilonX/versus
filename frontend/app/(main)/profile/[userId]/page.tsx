@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import ProfileContent from "./ProfileContent";
 import { UserProfileData } from "@/lib/types";
+import { API } from "@/lib/api";
 
 interface ProfilePageProps {
   params: Promise<{ userId: string }>;
@@ -13,9 +14,7 @@ async function getUserProfile(userId: string): Promise<UserProfileData | null> {
     const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:4000"}/api/users/profile/${userId}`,
-      {
+    const response = await fetch(API.users.profile(userId), {
         headers: {
           Cookie: cookieHeader,
         },
@@ -42,9 +41,7 @@ async function getCurrentSession() {
     const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:4000"}/api/auth/get-session`,
-      {
+    const response = await fetch(API.users.session, {
         headers: {
           Cookie: cookieHeader,
         },

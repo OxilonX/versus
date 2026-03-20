@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { API } from "@/lib/api";
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex flex-col sm:flex-row  items-center gap-1 ">
@@ -59,13 +60,10 @@ function ChallengeGridItem({
     e.stopPropagation();
 
     const deleteChallengeReq = async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:4000"}/api/challenges/${challenge.id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
+      const response = await fetch(API.challenges.delete(challenge.id), {
+        method: "DELETE",
+        credentials: "include",
+      });
 
       if (!response.ok) {
         if (response.status === 404) {

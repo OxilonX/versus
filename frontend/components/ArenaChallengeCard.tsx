@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 //motions
 import { AnimatePresence, motion, Variants } from "motion/react";
+import { API } from "@/lib/api";
 //types
 interface Challenge {
   id: string;
@@ -104,8 +105,8 @@ const fetchChallenges = async (
     if (search) params.set("search", sanitizeInput(search));
     const queryString = params.toString();
     const url = queryString
-      ? `/api/challenges?${queryString}`
-      : "/api/challenges";
+      ? `${API.challenges.list}?${queryString}`
+      : API.challenges.list;
 
     const response = await fetch(url, {
       method: "GET",
@@ -136,14 +137,11 @@ const fetchChallenges = async (
 };
 const likeChallenge = async (challengeId: string, signal?: AbortSignal) => {
   try {
-    const response = await fetch(
-      `/api/challenges/like/${encodeURIComponent(challengeId)}`,
-      {
-        method: "POST",
-        credentials: "include",
-        signal,
-      },
-    );
+    const response = await fetch(API.challenges.like(challengeId), {
+      method: "POST",
+      credentials: "include",
+      signal,
+    });
 
     // 1. CAPTURE THE 401 STATUS
     if (response.status === 401) {
@@ -164,16 +162,13 @@ const voteChallenge = async (
   signal?: AbortSignal,
 ) => {
   try {
-    const response = await fetch(
-      `/api/items/${encodeURIComponent(challengeId)}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        signal,
-        body: JSON.stringify({ itemId: encodeURIComponent(itemId) }),
-      },
-    );
+    const response = await fetch(API.items.vote(challengeId), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      signal,
+      body: JSON.stringify({ itemId: encodeURIComponent(itemId) }),
+    });
 
     // 1. Handle 401 explicitly before the .ok check
     if (response.status === 401) {
@@ -193,13 +188,10 @@ const voteChallenge = async (
 };
 const saveChallenge = async (challengeId: string) => {
   try {
-    const response = await fetch(
-      `/api/challenges/${encodeURIComponent(challengeId)}/save`,
-      {
-        method: "POST",
-        credentials: "include",
-      },
-    );
+    const response = await fetch(API.challenges.save(challengeId), {
+      method: "POST",
+      credentials: "include",
+    });
 
     if (response.status === 401) return { error: "Unauthorized" };
     if (!response.ok) {

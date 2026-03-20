@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { TriangleAlert } from "lucide-react";
+import { API } from "@/lib/api";
 interface ReportDialogProps {
   open: boolean;
   setReportOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -34,15 +35,12 @@ export default function ReportDialog({
     }
 
     const reportPromise = async () => {
-      const response = await fetch(
-        `/api/challenges/${encodeURIComponent(challengeId)}/report`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ reason }),
-        },
-      );
+      const response = await fetch(API.challenges.report(challengeId), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ reason }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

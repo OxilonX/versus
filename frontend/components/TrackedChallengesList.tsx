@@ -4,6 +4,7 @@ import TrackedChallengeGridItem from "./TrackedChallengesCard";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { SectionHeaders } from "@/motions/GlobalMotion";
+import { API } from "@/lib/api";
 interface SavedChallengeItem {
   itemId: string;
   item: {
@@ -39,13 +40,10 @@ const TrackedChallengesList = () => {
   useEffect(() => {
     const loadData = async () => {
       const fetchPromise = async () => {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:4000"}/api/challenges/saved`,
-          {
-            method: "GET",
-            credentials: "include",
-          },
-        );
+        const response = await fetch(API.challenges.saved, {
+          method: "GET",
+          credentials: "include",
+        });
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));

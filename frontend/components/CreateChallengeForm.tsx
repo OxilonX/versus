@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 //local comps imports
 import { SectionHeaders } from "@/motions/GlobalMotion";
+import { API } from "@/lib/api";
 const CreateChallengeForm = () => {
   const [challengeInput, setChallengeInput] = useState("");
   const [firstItemId, setFirstItemId] = useState<string>("");
@@ -42,7 +43,7 @@ const CreateChallengeForm = () => {
         title: challengeInput,
         items: [{ itemId: firstItemId }, { itemId: secondnItemId }],
       };
-      const response = await fetch("/api/challenges/", {
+      const response = await fetch(API.challenges.create, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

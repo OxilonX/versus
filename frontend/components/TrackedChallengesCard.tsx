@@ -4,6 +4,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { SavedChallengeProps } from "./TrackedChallengesList";
 import Link from "next/link";
+import { API } from "@/lib/api";
 export default function TrackedChallengeGridItem({
   savedChallenge,
   setSavedChallenge,
@@ -18,13 +19,10 @@ export default function TrackedChallengeGridItem({
     e.stopPropagation();
 
     const unsaveChallengePromise = async () => {
-      const response = await fetch(
-        `/api/challenges/${savedChallenge.id}/save`,
-        {
-          method: "POST",
-          credentials: "include",
-        },
-      );
+      const response = await fetch(API.challenges.save(savedChallenge.id), {
+        method: "POST",
+        credentials: "include",
+      });
 
       if (!response.ok) {
         if (response.status === 404) {

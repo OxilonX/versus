@@ -17,6 +17,7 @@ import Image from "next/image";
 //next imports
 import Link from "next/link";
 import { motion } from "motion/react";
+import { API } from "@/lib/api";
 const DEFAULT_IMAGE = "/images/default_item_v1.jpeg";
 
 const isValidImageSrc = (url: string): boolean => {
@@ -106,7 +107,7 @@ const CreateChallengeItem = memo(
 
     const getPublicItems = useCallback(async () => {
       try {
-        const response = await fetch("/api/items", {
+        const response = await fetch(API.items.list, {
           credentials: "include",
         });
         const data = await response.json();
@@ -125,7 +126,7 @@ const CreateChallengeItem = memo(
 
     const getPrivateItems = useCallback(async () => {
       try {
-        const response = await fetch("/api/items/private", {
+        const response = await fetch(API.items.private, {
           credentials: "include",
         });
         const data = await response.json();
@@ -213,7 +214,7 @@ const CreateChallengeItem = memo(
         });
       }
       const createItemRequest = async () => {
-        const response = await fetch("/api/items", {
+        const response = await fetch(API.items.list, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
