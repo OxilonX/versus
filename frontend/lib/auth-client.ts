@@ -39,8 +39,9 @@ export async function signUp(email: string, password: string, name: string) {
 export async function GoogleSignIn() {
   await authClient.signIn.social({
     provider: "google",
-    callbackURL: isProduction
-      ? "https://versus-blond.vercel.app"
-      : "http://localhost:3000",
+    callbackURL:
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "http://localhost:3000",
   });
 }
