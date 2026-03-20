@@ -184,9 +184,16 @@ export default function ProfileContent({
   profile,
   isOwn,
 }: {
-  profile: UserProfileData;
+  profile: UserProfileData | null;
   isOwn: boolean;
 }) {
+  if (!profile || !profile.user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
   const [copied, setCopied] = useState(false);
   console.log(profile);
 
