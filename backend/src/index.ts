@@ -27,6 +27,10 @@ app.use(express.json());
 
 app.all("/api/auth/**", toNodeHandler(auth));
 
+app.get("/api/test", (_req, res) => {
+  res.json({ test: "ok" });
+});
+
 app.use("/api/challenges", challengesRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/items", itemsRouter);
