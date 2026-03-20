@@ -90,10 +90,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const session = await getCurrentSession();
   const profile = await getUserProfile(userId);
 
-  if (!profile?.user) {
-    notFound();
-  }
-
   const _isOwnProfile = session?.user?.id === userId;
 
   return (
