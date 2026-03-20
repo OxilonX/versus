@@ -25,10 +25,6 @@ app.use(
 
 app.use(express.json());
 
-app.get("/api/test", (_req, res) => {
-  res.json({ test: "ok" });
-});
-
 app.use("/api/auth", toNodeHandler(auth));
 
 app.use("/api/challenges", challengesRouter);
