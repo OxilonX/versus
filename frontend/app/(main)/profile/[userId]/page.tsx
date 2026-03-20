@@ -15,21 +15,22 @@ async function getUserProfile(userId: string): Promise<UserProfileData | null> {
     const cookieHeader = cookieStore.toString();
 
     const response = await fetch(API.users.profile(userId), {
-        headers: {
-          Cookie: cookieHeader,
-        },
-        credentials: "include",
+      headers: {
+        Cookie: cookieHeader,
       },
-    );
+      credentials: "include",
+      cache: "no-store",
+    });
 
     if (!response.ok) {
       if (response.status === 404) {
         return null;
       }
-      throw new Error("Failed to fetch user profile");
+      return null;
     }
 
-    return response.json();
+    const data = await response.json();
+    return data?.user ? data : null;
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return null;
@@ -42,12 +43,12 @@ async function getCurrentSession() {
     const cookieHeader = cookieStore.toString();
 
     const response = await fetch(API.users.session, {
-        headers: {
-          Cookie: cookieHeader,
-        },
-        credentials: "include",
+      headers: {
+        Cookie: cookieHeader,
       },
-    );
+      credentials: "include",
+      cache: "no-store",
+    });
 
     if (!response.ok) {
       return null;
@@ -63,31 +64,35 @@ async function getCurrentSession() {
 export async function generateMetadata({
   params,
 }: ProfilePageProps): Promise<Metadata> {
-  const { userId } = await params;
-  const profile = await getUserProfile(userId);
+  try {
+    const { userId } = await params;
+    const profile = await getUserProfile(userId);
 
-  if (!profile) {
+    if (!profile?.user) {
+      return {
+        title: "User Not Found | Versus",
+      };
+    }
+
     return {
-      title: "User Not Found | Versus",
+      title: `${profile.user.name || "User"}'s Profile | Versus`,
+    };
+  } catch {
+    return {
+      title: "Profile | Versus",
     };
   }
-
-  return {
-    title: `${profile.user.name || "User"}'s Profile | Versus`,
-  };
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { userId } = await params;
 
   const session = await getCurrentSession();
-
   const profile = await getUserProfile(userId);
 
-  if (!profile) {
+  if (!profile?.user) {
     notFound();
   }
-  // console.log(profile);
 
   const _isOwnProfile = session?.user?.id === userId;
 
