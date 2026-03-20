@@ -4,7 +4,6 @@ import { prisma } from "./prisma.js";
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
-  trustedOrigins: ["https://versus-blond.vercel.app"],
   appURL: process.env.BETTER_AUTH_APP_URL || "http://localhost:3000",
   basePath: "/api/auth",
   database: prismaAdapter(prisma, {
@@ -31,7 +30,11 @@ export const auth = betterAuth({
       maxAge: 5 * 60,
     },
   },
-  trustedOrigins: ["http://localhost:3000", "http://localhost:4000"],
+  trustedOrigins: [
+    "https://versus-blond.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:4000",
+  ],
   secret: process.env.BETTER_AUTH_SECRET,
 });
 
