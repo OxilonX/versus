@@ -28,13 +28,7 @@ import Image from "next/image";
 import { ShareFatIcon, BookmarkSimpleIcon } from "@phosphor-icons/react";
 import ReportDialog from "@/components/ArenaReportDialog";
 import { Ellipsis, Heart, Copy, Check } from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useState,
-  useRef,
-  JSXElementConstructor,
-} from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { Spinner } from "./ui/spinner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -417,13 +411,15 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
 
       toast.promise(savePromise(), {
         loading: "Saving...",
-        success: () => {
+        success: (result: { isSaved: boolean }) => {
           setChallenges((prev) =>
             prev.map((c) =>
-              c.id === challengeId ? { ...c, isSaved: true } : c,
+              c.id === challengeId ? { ...c, isSaved: result.isSaved } : c,
             ),
           );
-          return "Added to your saves.";
+          return result.isSaved
+            ? "Added to your saves."
+            : "Removed from saves.";
         },
         error: (err) => err.message,
       });
@@ -438,7 +434,7 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
           variants={container}
           initial="hidden"
           animate="visible"
-          className="w-full flex flex-col gap-8"
+          className="w-full flex flex-col gap-16"
         >
           {isFetchingChallenges ? (
             <div className="bg-background flex items-center justify-center min-h-[300px]">
@@ -655,9 +651,10 @@ const ArenaChallengeCard = ({ sort, search }: ArenaChallengeCardProps) => {
                           </Dialog>
                         </div>
                         <BookmarkSimpleIcon
-                          size={26}
+                          size={24}
+                          weight="fill"
                           onClick={() => handleSave(c?.id)}
-                          className="stroke-2 cursor-pointer"
+                          className={` cursor-pointer ${c.isSaved ? "stroke-0 fill-primary " : "stroke-14 stroke-white fill-none "}`}
                         />
                       </div>
                       <div className="pt-1 flex items-center text-muted-foreground font-medium text-xs">

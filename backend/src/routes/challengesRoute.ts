@@ -7,6 +7,7 @@ import {
   deleteChallenge,
   reportChallenge,
   saveChallenge,
+  getSavedChallenges,
 } from "../controllers/challengesController.js";
 import { protectRoute, optionalAuth } from "../middleware/protectRoute.js";
 
@@ -15,6 +16,7 @@ const router = Router();
 router.delete("/:challengeId", protectRoute, deleteChallenge);
 router.post("/", protectRoute, createChallenge);
 router.post("/like/:challengeId", protectRoute, likeChallenge);
+router.get("/saved", protectRoute, getSavedChallenges);
 router.get("/", optionalAuth, getChallenges);
 router.get("/:challengeId", getChallengeById);
 router.post("/:challengeId/report", protectRoute, reportChallenge);

@@ -1,7 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 import type { Request, Response } from "express";
 interface MappedChallenge {
-  save?: { userId: string }[];
+  saves?: { userId: string }[];
   like?: { userId: string }[];
   votes?: { itemId: string }[];
   items: any[];
@@ -137,7 +137,7 @@ export const getChallenges = async (req: Request, res: Response) => {
           where: { userId: currentUserId },
           select: { itemId: true },
         },
-        save: {
+        saves: {
           where: { userId: currentUserId },
           select: { userId: true },
         },
@@ -151,7 +151,7 @@ export const getChallenges = async (req: Request, res: Response) => {
       return {
         ...c,
         isLiked: (c.like?.length ?? 0) > 0,
-        isSaved: (c.save?.length ?? 0) > 0,
+        isSaved: (c.saves?.length ?? 0) > 0,
         likesCount: c._count.like,
         userVotedItemId: c.votes?.[0]?.itemId || null,
         stats: {
@@ -358,9 +358,10 @@ export const saveChallenge = async (req: Request, res: Response) => {
           },
         },
       });
-      return res.status(203).json({
+      return res.status(200).json({
         message: "The Challenge is unsaved successfuly",
-        removedChallenge: remove,
+        remove,
+        isSaved: false,
       });
     }
 
@@ -373,6 +374,7 @@ export const saveChallenge = async (req: Request, res: Response) => {
 
     return res.status(201).json({
       message: "Challenge added to saves successfully",
+      isSaved: true,
       save,
     });
   } catch (err: any) {
@@ -381,5 +383,73 @@ export const saveChallenge = async (req: Request, res: Response) => {
     }
 
     return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const getSavedChallenges = async (req: Request, res: Response) => {
+  try {
+    const currentUserId = req.user?.id;
+
+    if (!currentUserId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const savedRecords = await prisma.save.findMany({
+      where: { userId: currentUserId },
+      include: {
+        challenge: {
+          select: {
+            id: true,
+            title: true,
+            userId: true,
+            createdAt: true,
+            items: {
+              orderBy: { itemId: "asc" },
+              select: {
+                itemId: true,
+                item: {
+                  select: {
+                    id: true,
+                    name: true,
+                    imageUrl: true,
+                  },
+                },
+                _count: {
+                  select: { votes: true },
+                },
+              },
+            },
+            votes: {
+              where: { userId: currentUserId },
+              select: { itemId: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const results = savedRecords.map((record) => {
+      const challenge = record.challenge;
+      const item1Votes = challenge.items[0]?._count.votes || 0;
+      const item2Votes = challenge.items[1]?._count.votes || 0;
+      const totalVotes = item1Votes + item2Votes;
+
+      return {
+        ...challenge,
+        userVotedItemId: challenge.votes[0]?.itemId || null,
+        stats: {
+          item1Percent:
+            totalVotes > 0 ? Math.round((item1Votes / totalVotes) * 100) : 0,
+          item2Percent:
+            totalVotes > 0 ? Math.round((item2Votes / totalVotes) * 100) : 0,
+          totalVotes,
+        },
+      };
+    });
+
+    res.json(results);
+  } catch (error) {
+    console.error("Error fetching Saved Challenges:", error);
+    res.status(500).json({ error: "Failed to fetch Saved Challenges" });
   }
 };
