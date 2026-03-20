@@ -1,9 +1,12 @@
 import { createAuthClient } from "better-auth/react";
 
 export const authClient = createAuthClient({
-  baseURL: "",
+  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:4000",
   session: {
     refetchOnWindowFocus: false,
+  },
+  fetchOptions: {
+    credentials: "include",
   },
 });
 
@@ -36,9 +39,8 @@ export async function signUp(email: string, password: string, name: string) {
 export async function GoogleSignIn() {
   await authClient.signIn.social({
     provider: "google",
-    callbackURL:
-      typeof window !== "undefined"
-        ? window.location.origin
-        : "http://localhost:3000",
+    callbackURL: isProduction
+      ? "https://versus-blond.vercel.app"
+      : "http://localhost:3000",
   });
 }
