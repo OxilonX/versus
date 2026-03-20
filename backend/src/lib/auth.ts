@@ -57,7 +57,7 @@ export const auth = betterAuth({
     },
     onAPIError: {
       throw: true,
-      onError: (error, ctx) => {
+      onError: (error: unknown, ctx: { request: Request }) => {
         // Custom error handling
         console.error("Auth error:", error);
       },
