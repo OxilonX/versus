@@ -13,11 +13,8 @@ const PORT = process.env.PORT || 4000;
 app.set("trust proxy", 1);
 
 app.use((req, _res, next) => {
-  console.log(`[EXPRESS] ${req.method} ${req.url}`);
-  console.log(`[EXPRESS] x-forwarded-proto: ${req.headers["x-forwarded-proto"]}`);
-  console.log(`[EXPRESS] x-forwarded-host: ${req.headers["x-forwarded-host"]}`);
-  console.log(`[EXPRESS] host: ${req.headers.host}`);
-  console.log(`[EXPRESS] origin: ${req.headers.origin}`);
+  console.log(`[DEBUG] ${req.method} ${req.url} | Cookies: ${req.headers.cookie}`);
+  console.log(`[DEBUG] x-forwarded-proto: ${req.headers["x-forwarded-proto"]} | x-forwarded-host: ${req.headers["x-forwarded-host"]}`);
   next();
 });
 

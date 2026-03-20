@@ -45,18 +45,17 @@ export const auth = betterAuth({
       enabled: true,
     },
     onRequest: (request: { method: string; url: string; headers: Headers }) => {
+      const cookie = request.headers.get("cookie");
       const forwardedProto = request.headers.get("x-forwarded-proto");
       const forwardedHost = request.headers.get("x-forwarded-host");
-      console.log(`[AUTH_REQUEST] ${request.method} ${request.url}`);
-      console.log(`[AUTH_REQUEST] x-forwarded-proto: ${forwardedProto}`);
-      console.log(`[AUTH_REQUEST] x-forwarded-host: ${forwardedHost}`);
-      console.log(`[AUTH_REQUEST] Headers:`, JSON.stringify(Object.fromEntries(request.headers)));
+      console.log(`[DEBUG] Incoming Request: ${request.method} ${request.url} | Cookies: ${cookie}`);
+      console.log(`[DEBUG] x-forwarded-proto: ${forwardedProto} | x-forwarded-host: ${forwardedHost}`);
     },
     onAPIError: {
       throw: true,
-      errorURL: "https://versus-blond.vercel.app/login?error=auth_failed",
+      errorURL: "https://versus-blond.vercel.app/login?error=state_mismatch",
       onError: ({ url, error }: { url: string; error: Error }) => {
-        console.error(`[AUTH_ERROR] Path: ${url} | Error:`, error);
+        console.error(`[DEBUG] Auth Error at ${url}:`, error);
       },
     },
   },
