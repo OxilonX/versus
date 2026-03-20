@@ -13,7 +13,7 @@ export const API = {
   },
   users: {
     list: `${API_BASE}/api/users`,
-    profile: (id: string) => `${API_BASE}/api/users/${encodeURIComponent(id)}`,
+    profile: (id: string) => `${API_BASE}/api/users/profile/${encodeURIComponent(id)}`,
     session: `${API_BASE}/api/auth/get-session`,
   },
   items: {
