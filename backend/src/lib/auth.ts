@@ -33,13 +33,13 @@ export const auth = betterAuth({
   },
   trustedOrigins: [
     "https://versus-blond.vercel.app",
+    "https://versus-tc44.onrender.com",
     "http://localhost:3000",
     "http://localhost:4000",
   ],
   secret: process.env.BETTER_AUTH_SECRET,
   advanced: {
     useSecureCookies: true,
-    cookiePrefix: "better-auth",
     crossSiteCookies: {
       enabled: true,
     },
