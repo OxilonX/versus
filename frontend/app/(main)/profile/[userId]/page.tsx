@@ -14,9 +14,6 @@ async function getUserProfile(userId: string): Promise<UserProfileData | null> {
     const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
 
-    console.log("[getUserProfile] Fetching profile for:", userId);
-    console.log("[getUserProfile] Cookie header:", cookieHeader);
-
     const response = await fetch(API.users.profile(userId), {
       headers: {
         Cookie: cookieHeader,
@@ -25,20 +22,13 @@ async function getUserProfile(userId: string): Promise<UserProfileData | null> {
       cache: "no-store",
     });
 
-    console.log("[getUserProfile] Response status:", response.status);
-
     if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
       return null;
     }
 
     const data = await response.json();
-    console.log("[getUserProfile] Response data:", data);
     return data?.user ? data : null;
-  } catch (error) {
-    console.error("[getUserProfile] Error:", error);
+  } catch {
     return null;
   }
 }
@@ -48,9 +38,6 @@ async function getCurrentSession() {
     const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
 
-    console.log("[getCurrentSession] Fetching session");
-    console.log("[getCurrentSession] Cookie header:", cookieHeader);
-
     const response = await fetch(API.users.session, {
       headers: {
         Cookie: cookieHeader,
@@ -59,17 +46,12 @@ async function getCurrentSession() {
       cache: "no-store",
     });
 
-    console.log("[getCurrentSession] Response status:", response.status);
-
     if (!response.ok) {
       return null;
     }
 
-    const data = await response.json();
-    console.log("[getCurrentSession] Session data:", data);
-    return data;
-  } catch (error) {
-    console.error("[getCurrentSession] Error:", error);
+    return response.json();
+  } catch {
     return null;
   }
 }
@@ -100,13 +82,8 @@ export async function generateMetadata({
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { userId } = await params;
 
-  console.log("[PROFILE_PAGE] userId:", userId);
-
   const session = await getCurrentSession();
-  console.log("[PROFILE_PAGE] session:", session);
-
   const profile = await getUserProfile(userId);
-  console.log("[PROFILE_PAGE] profile:", profile);
 
   const _isOwnProfile = session?.user?.id === userId;
 

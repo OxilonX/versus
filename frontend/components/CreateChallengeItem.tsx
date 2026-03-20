@@ -111,7 +111,6 @@ const CreateChallengeItem = memo(
           credentials: "include",
         });
         const data = await response.json();
-        console.log("public items : ", data);
 
         if (!response.ok) {
           throw new Error(data.error || "Server rejected to send public items");
