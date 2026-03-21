@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const isDev = process.env.NODE_ENV === "development";
+
+const API_URL = isDev
+  ? "http://localhost:4000"
+  : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000");
 
 export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/api/")) {
