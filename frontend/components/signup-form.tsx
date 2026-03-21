@@ -19,7 +19,9 @@ import { GoogleSignIn, signUp, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 // OPTIMIZATION: Added memo to prevent unnecessary re-renders
-export const SignupForm = memo(function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+export const SignupForm = memo(function SignupForm({
+  ...props
+}: React.ComponentProps<typeof Card>) {
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -28,20 +30,23 @@ export const SignupForm = memo(function SignupForm({ ...props }: React.Component
   }, [session, router]);
 
   // OPTIMIZATION: Wrapped in useCallback to prevent recreation on every render
-  const handleSignupSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const name = formData.get("name") as string;
+  const handleSignupSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
+      const name = formData.get("name") as string;
 
-    try {
-      await signUp(email, password, name);
-      router.push("/");
-    } catch (error) {
-      console.error("Signup failed:", error);
-    }
-  }, [router]);
+      try {
+        await signUp(email, password, name);
+        router.push("/");
+      } catch (error) {
+        console.error("Signup failed:", error);
+      }
+    },
+    [router],
+  );
   return (
     <Card className="bg-card" {...props}>
       <CardHeader>
@@ -56,7 +61,13 @@ export const SignupForm = memo(function SignupForm({ ...props }: React.Component
             <div className="flex items-center justify-between gap-4">
               <Field>
                 <FieldLabel htmlFor="name">Username</FieldLabel>
-                <Input id="name" name="name" type="text" placeholder="John Doe" required />
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="John Doe"
+                  required
+                />
               </Field>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -81,7 +92,12 @@ export const SignupForm = memo(function SignupForm({ ...props }: React.Component
               <FieldLabel htmlFor="confirm-password">
                 Confirm Password
               </FieldLabel>
-              <Input id="confirm-password" name="confirmPassword" type="password" required />
+              <Input
+                id="confirm-password"
+                name="confirmPassword"
+                type="password"
+                required
+              />
               <FieldDescription>Please confirm your password.</FieldDescription>
             </Field>
             <Field>
