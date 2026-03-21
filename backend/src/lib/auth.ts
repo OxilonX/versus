@@ -3,14 +3,16 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma.js";
 
 const isDev = process.env.IS_DEV === "true";
-
+const appURL = isDev
+  ? "http://localhost:3000"
+  : process.env.BETTER_AUTH_APP_URL || "http://localhost:3000";
 export const auth = betterAuth({
   baseURL: isDev
     ? "http://localhost:4000"
-    : (process.env.BETTER_AUTH_URL || "http://localhost:4000"),
+    : process.env.BETTER_AUTH_URL || "http://localhost:4000",
   appURL: isDev
     ? "http://localhost:3000"
-    : (process.env.BETTER_AUTH_APP_URL || "http://localhost:3000"),
+    : process.env.BETTER_AUTH_APP_URL || "http://localhost:3000",
   basePath: "/api/auth",
   database: prismaAdapter(prisma, {
     provider: "postgresql",
@@ -25,8 +27,6 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      accessType: "offline",
-      prompt: "select_account consent",
     },
   },
   session: {
@@ -43,11 +43,12 @@ export const auth = betterAuth({
     "http://localhost:3000",
     "http://localhost:4000",
   ],
+
   secret: process.env.BETTER_AUTH_SECRET,
   advanced: {
-    useSecureCookies: true,
+    useSecureCookies: !isDev,
     defaultCookieAttributes: {
-      sameSite: "none",
+      sameSite: isDev ? "lax" : "none",
     },
     onRequest: (request: { method: string; url: string; headers: Headers }) => {
       const cookie = request.headers.get("cookie");
@@ -65,7 +66,7 @@ export const auth = betterAuth({
       onError: (error: unknown, ctx: { request: Request }) => {
         console.error("Auth error:", error);
       },
-      errorURL: "https://versus-blond.vercel.app/login?error=state_mismatch",
+      errorURL: `${appURL}/login?error=state_mismatch`,
       customizeDefaultErrorPage: {
         colors: {
           background: "#ffffff",

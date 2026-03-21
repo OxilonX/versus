@@ -5,7 +5,7 @@ const isDev = process.env.IS_DEV === "true";
 export const authClient = createAuthClient({
   baseURL: isDev
     ? "http://localhost:4000"
-    : (process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:4000"),
+    : process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:4000",
   session: {
     refetchOnWindowFocus: false,
   },

@@ -9,26 +9,21 @@ import itemsRouter from "./routes/itemsRoute.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-
+const isDev = process.env.IS_DEV === "true";
 app.set("trust proxy", 1);
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || ["http://localhost:3000"];
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [
+  "http://localhost:3000",
+];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.error(`CORS Blocked: ${origin} is not in allowed list`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
-}));
+app.use(
+  cors({
+    origin: isDev ? "http://localhost:3000" : allowedOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  }),
+);
 app.use(express.json());
 
 app.use("/api/auth", toNodeHandler(auth));
