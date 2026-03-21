@@ -2,9 +2,15 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma.js";
 
+const isDev = process.env.IS_DEV === "true";
+
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL,
-  appURL: process.env.BETTER_AUTH_APP_URL || "http://localhost:3000",
+  baseURL: isDev
+    ? "http://localhost:4000"
+    : (process.env.BETTER_AUTH_URL || "http://localhost:4000"),
+  appURL: isDev
+    ? "http://localhost:3000"
+    : (process.env.BETTER_AUTH_APP_URL || "http://localhost:3000"),
   basePath: "/api/auth",
   database: prismaAdapter(prisma, {
     provider: "postgresql",
@@ -19,7 +25,6 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      redirectURI: `${process.env.BETTER_AUTH_URL as string}/api/auth/callback/google`,
       accessType: "offline",
       prompt: "select_account consent",
     },
@@ -58,7 +63,6 @@ export const auth = betterAuth({
     onAPIError: {
       throw: true,
       onError: (error: unknown, ctx: { request: Request }) => {
-        // Custom error handling
         console.error("Auth error:", error);
       },
       errorURL: "https://versus-blond.vercel.app/login?error=state_mismatch",

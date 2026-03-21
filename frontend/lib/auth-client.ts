@@ -1,7 +1,11 @@
 import { createAuthClient } from "better-auth/react";
 
+const isDev = process.env.IS_DEV === "true";
+
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:4000",
+  baseURL: isDev
+    ? "http://localhost:4000"
+    : (process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:4000"),
   session: {
     refetchOnWindowFocus: false,
   },
@@ -39,9 +43,6 @@ export async function signUp(email: string, password: string, name: string) {
 export async function GoogleSignIn() {
   await authClient.signIn.social({
     provider: "google",
-    callbackURL:
-      typeof window !== "undefined"
-        ? window.location.origin
-        : "http://localhost:3000",
+    callbackURL: isDev ? "http://localhost:3000" : window.location.origin,
   });
 }

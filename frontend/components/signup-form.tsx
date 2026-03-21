@@ -1,4 +1,5 @@
 "use client";
+const isDev = process.env.NODE_ENV === "development";
 import { useEffect, useCallback, memo } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -108,8 +109,9 @@ export const SignupForm = memo(function SignupForm({
                 variant="secondary"
                 type="button"
                 className="w-full"
+                disabled={!isDev}
               >
-                Sign up with Google
+                Continue with Google
               </Button>
 
               <FieldDescription className="px-6 text-center">

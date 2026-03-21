@@ -1,5 +1,4 @@
 "use client";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { GoogleSignIn, signIn } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useCallback, memo } from "react";
+const isDev = process.env.NODE_ENV === "development";
 
 export const LoginForm = memo(function LoginForm({
   className,
@@ -82,8 +82,9 @@ export const LoginForm = memo(function LoginForm({
                   onClick={() => GoogleSignIn()}
                   variant="secondary"
                   type="button"
+                  disabled={!isDev}
                 >
-                  Login with Google
+                  Continue with Google
                 </Button>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account? <a href="/signup">Sign up</a>
