@@ -1,6 +1,6 @@
 import { createAuthClient } from "better-auth/react";
 
-const isDev = process.env.IS_DEV === "true";
+const isDev = process.env.NODE_ENV === "development";
 
 export const authClient = createAuthClient({
   baseURL: isDev
