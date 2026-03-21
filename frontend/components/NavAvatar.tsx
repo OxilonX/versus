@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,13 +15,17 @@ import { useRouter } from "next/navigation";
 //local comps imports
 import LoadingScreen from "./LoadingScreen";
 export default function NavAvatar() {
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const session = useSession();
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const handleSignOut = async () => {
     await signOut();
     router.refresh();
   };
-  if (session.isPending) {
+  if (!mounted || session.isPending) {
     return <LoadingScreen />;
   }
 
