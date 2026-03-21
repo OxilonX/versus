@@ -1,11 +1,14 @@
+import "dotenv/config";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma.js";
 
 const isDev = process.env.IS_DEV === "true";
+console.log(`[AUTH] IS_DEV: ${isDev}, BETTER_AUTH_URL: ${process.env.BETTER_AUTH_URL}`);
 const appURL = isDev
   ? "http://localhost:3000"
   : process.env.BETTER_AUTH_APP_URL || "http://localhost:3000";
+console.log(`[AUTH] baseURL will be: ${isDev ? "http://localhost:4000" : (process.env.BETTER_AUTH_URL || "http://localhost:4000")}`);
 export const auth = betterAuth({
   baseURL: isDev
     ? "http://localhost:4000"
