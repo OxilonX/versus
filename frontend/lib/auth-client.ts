@@ -41,8 +41,11 @@ export async function signUp(email: string, password: string, name: string) {
 }
 
 export async function GoogleSignIn() {
+  const callbackURL = isDev
+    ? "http://localhost:3000"
+    : (typeof window !== "undefined" ? window.location.origin : "/");
   await authClient.signIn.social({
     provider: "google",
-    callbackURL: "/",
+    callbackURL,
   });
 }
