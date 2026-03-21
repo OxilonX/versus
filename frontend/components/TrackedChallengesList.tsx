@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { SectionHeaders } from "@/motions/GlobalMotion";
 import { API } from "@/lib/api";
+import { Bookmark } from "lucide-react";
 interface SavedChallengeItem {
   itemId: string;
   item: {
@@ -83,15 +84,27 @@ const TrackedChallengesList = () => {
       <div className="pb-4">
         <SectionHeaders>explore your choices</SectionHeaders>
       </div>
-      <ul className="grid grid-cols-3 gap-4">
-        {savedChallenges.map((challenge) => (
-          <TrackedChallengeGridItem
-            key={challenge?.id}
-            savedChallenge={challenge}
-            setSavedChallenge={setSavedChallenges}
-          />
-        ))}
-      </ul>
+      {savedChallenges.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <Bookmark className="w-16 h-16 text-muted-foreground mb-4" />
+          <h3 className="text-xl font-semibold text-foreground mb-2">
+            No tracked challenges yet
+          </h3>
+          <p className="text-muted-foreground max-w-md">
+            Start voting on challenges and save your favorites to see them here.
+          </p>
+        </div>
+      ) : (
+        <ul className="grid grid-cols-3 gap-4">
+          {savedChallenges.map((challenge) => (
+            <TrackedChallengeGridItem
+              key={challenge?.id}
+              savedChallenge={challenge}
+              setSavedChallenge={setSavedChallenges}
+            />
+          ))}
+        </ul>
+      )}
     </section>
   );
 };

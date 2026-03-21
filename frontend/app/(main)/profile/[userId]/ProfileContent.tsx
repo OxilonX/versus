@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { Grid3X3, Bookmark, Share, Check, Copy } from "lucide-react";
+import { Grid3X3, Bookmark, Share, Check, Copy, Plus } from "lucide-react";
 import { UserProfileData, ProfileChallenge } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
@@ -343,27 +343,75 @@ export default function ProfileContent({
         </TabsList>
 
         <TabsContent value="created" className="mt-1">
-          <div className="grid grid-cols-3 gap-1 md:gap-7">
-            {challenges.map((challenge) => (
-              <ChallengeGridItem
-                key={challenge.id}
-                challenge={challenge}
-                setChallenges={setChallenges}
-                isOwn={isOwn}
-              />
-            ))}
-          </div>
+          {challenges.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              {isOwn ? (
+                <>
+                  <Plus className="w-16 h-16 text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                    No challenges created yet
+                  </h3>
+                  <p className="text-muted-foreground max-w-md mb-4">
+                    Create your first challenge and see it here.
+                  </p>
+                  <Button asChild>
+                    <Link href="/create">Create Challenge</Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Grid3X3 className="w-16 h-16 text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                    No challenges yet
+                  </h3>
+                  <p className="text-muted-foreground max-w-md">
+                    This user hasn&apos;t created any challenges.
+                  </p>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-1 md:gap-7">
+              {challenges.map((challenge) => (
+                <ChallengeGridItem
+                  key={challenge.id}
+                  challenge={challenge}
+                  setChallenges={setChallenges}
+                  isOwn={isOwn}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="voted" className="mt-1">
-          <div className="grid grid-cols-3 gap-1 md:gap-7">
-            {profile.votedChallenges.map((challenge) => (
-              <VotedChallengeGridItem
-                key={challenge.id}
-                challenge={challenge}
-              />
-            ))}
-          </div>
+          {profile.votedChallenges.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <Bookmark className="w-16 h-16 text-muted-foreground mb-4" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                No votes yet
+              </h3>
+              <p className="text-muted-foreground max-w-md mb-4">
+                {isOwn
+                  ? "Vote on challenges to see them here."
+                  : "This user hasn't voted on any challenges yet."}
+              </p>
+              {isOwn && (
+                <Button asChild>
+                  <Link href="/arena">Explore Challenges</Link>
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-1 md:gap-7">
+              {profile.votedChallenges.map((challenge) => (
+                <VotedChallengeGridItem
+                  key={challenge.id}
+                  challenge={challenge}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
