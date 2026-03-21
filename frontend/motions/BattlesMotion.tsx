@@ -18,8 +18,8 @@ export const BattlesListMotion = ({ battles }: battlesProps) => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.1,
+        staggerChildren: 0.05,
+        delayChildren: 0.05,
       },
     },
   };
@@ -31,8 +31,8 @@ export const BattlesListMotion = ({ battles }: battlesProps) => {
       y: 0,
       transition: {
         type: "spring",
-        stiffness: 300,
-        damping: 30,
+        stiffness: 400,
+        damping: 25,
       },
     },
   };

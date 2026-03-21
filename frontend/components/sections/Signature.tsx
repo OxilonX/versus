@@ -15,7 +15,7 @@ const titleVariants: Variants = {
       type: "spring",
       stiffness: 100,
       damping: 20,
-      staggerChildren: 0.025,
+      staggerChildren: 0.015,
       delayChildren: 0,
     },
   },
@@ -23,7 +23,7 @@ const titleVariants: Variants = {
 
 const wordVariants: Variants = {
   hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.1, ease: "easeOut" } },
 };
 
 const SignatureTitle = ({ onComplete }: { onComplete: () => void }) => (
@@ -54,7 +54,7 @@ const SignatureParagraph = ({ isVisible }: { isVisible: boolean }) => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.008, delayChildren: 0.2 },
+      transition: { staggerChildren: 0.004, delayChildren: 0.1 },
     },
   };
 
@@ -84,7 +84,7 @@ const Signature = () => {
     <div className="flex flex-col gap-10">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
-        whileInView={{ opacity: 1, y: 0, transition: { duration: 0.25 } }}
+        whileInView={{ opacity: 1, y: 0, transition: { duration: 0.15 } }}
         viewport={{ once: true }}
         className="flex items-center"
       >
