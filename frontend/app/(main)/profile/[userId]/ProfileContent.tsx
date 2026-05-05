@@ -16,8 +16,7 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
-import { Grid3X3, Bookmark, Share, Check, Copy, Plus } from "lucide-react";
+import { Trash2, Grid3X3, Bookmark, Share, Check, Copy, Plus } from "lucide-react";
 import { UserProfileData, ProfileChallenge } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
@@ -105,11 +104,11 @@ function ChallengeGridItem({
                 e.stopPropagation();
                 setOpen(true);
               }}
-              className="hidden group-hover:flex absolute items-start justify-end w-full pr-2 pt-2 z-20"
+              className="absolute top-2 right-2 z-20"
             >
-              <X
-                size={30}
-                className="stroke-destructive hover:stroke-red-400 transition-colors duration-300 cursor-pointer"
+              <Trash2
+                size={24}
+                className="text-destructive hover:text-red-400 transition-colors duration-300 cursor-pointer"
               />
             </div>
           </AlertDialogTrigger>
